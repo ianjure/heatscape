@@ -11,16 +11,16 @@ st.set_page_config(layout="wide")
 st.sidebar.title("UHI Simulation Controls")
 st.title("CDO Urban Heat Island Visualization")
 
-# 1. Load data
+# Load data
 @st.cache_data
 def load_geojson():
-    ph_barangays = gpd.read_file("PH_Adm4_BgySubMuns.shp")
+    ph_barangays = gpd.read_file("PH_Adm4_BgySubMuns.zip")
     cdo_barangays = ph_barangays[ph_barangays['adm3_psgc'] == 1030500000]
     return cdo_barangays[['adm4_en', 'geometry']].rename(columns={'adm4_en': 'barangay'}).to_crs(epsg=4326)
 
 cdo_gdf = load_geojson()
 
-# 2. Simulation controls in sidebar
+# Simulation controls in sidebar
 with st.sidebar:
     st.header("Simulation Parameters")
     urban_heat = st.slider("Urban Heat Intensity", 0.0, 5.0, 2.5, 0.1)
@@ -30,7 +30,7 @@ with st.sidebar:
     # Generate random UHI values for demo (replace with your model)
     cdo_gdf['uhi'] = np.random.uniform(urban_heat-1, urban_heat+1, len(cdo_gdf)) * vegetation
 
-# 3. Calculate bounds with buffer
+# Calculate bounds with buffer
 bounds = cdo_gdf.total_bounds
 buffer = 0.05
 m = folium.Map(
@@ -51,7 +51,7 @@ m = folium.Map(
     control_scale=False
 )
 
-# 4. Add choropleth layer (using simulated UHI values)
+# Add choropleth layer (using simulated UHI values)
 folium.Choropleth(
     geo_data=cdo_gdf,
     name="UHI Intensity",
@@ -65,7 +65,7 @@ folium.Choropleth(
     bins=[0, 1, 2, 3, 4, 5]
 ).add_to(m)
 
-# 5. Add interactive tooltips
+# Add interactive tooltips
 folium.GeoJson(
     cdo_gdf,
     style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
@@ -77,5 +77,5 @@ folium.GeoJson(
     )
 ).add_to(m)
 
-# 6. Full-page map display
+# Full-page map display
 folium_static(m, width=1400, height=700)
