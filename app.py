@@ -33,7 +33,7 @@ with st.sidebar:
 # Calculate bounds with buffer
 bounds = cdo_gdf.total_bounds
 buffer = 0.05
-m = folium.Map(
+map = folium.Map(
     location=[8.48, 124.65],
     zoom_start=11,
     min_zoom=11,
@@ -63,7 +63,7 @@ folium.Choropleth(
     line_opacity=0.2,
     legend_name="UHI Intensity (°C)",
     bins=[0, 1, 2, 3, 4, 5]
-).add_to(m)
+).add_to(map)
 
 # Add interactive tooltips
 folium.GeoJson(
@@ -75,7 +75,7 @@ folium.GeoJson(
         localize=True,
         style=("font-weight: bold;")
     )
-).add_to(m)
+).add_to(map)
 
 # Full-page map display
-folium_static(m, width=1400, height=700)
+folium_static(map, width=1400, height=700)
