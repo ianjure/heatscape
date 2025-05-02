@@ -161,7 +161,7 @@ from ipyleaflet import Map, LayersControl
 layer_control = LayersControl()
 
 # Remove the layer control from the map
-m.remove_control(layer_control)
+map.remove_control(layer_control)
 
 # Full-page map display
 map.to_streamlit(use_container_width=True)
