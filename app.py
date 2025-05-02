@@ -150,12 +150,6 @@ m = leafmap.Map(
     max_lon=bounds[2]+buffer
 )
 
-# Create color scale
-colormap = linear.YlOrRd_06.scale(
-    sim_data['UHI_index'].min(),
-    sim_data['UHI_index'].max()
-)
-
 # Add GeoJSON layer with styling
 m.add_geojson(
     sim_data.to_json(),
@@ -173,15 +167,6 @@ m.add_geojson(
     tooltip_style=("font-weight: bold; font-size: 12px; background: white; padding: 5px;"),
     colormap=colormap,
     value_col='UHI_index'
-)
-
-# Add legend
-m.add_colorbar(
-    colors=colormap.colors,
-    vmin=sim_data['UHI_index'].min(),
-    vmax=sim_data['UHI_index'].max(),
-    caption='UHI Intensity (°C)',
-    position='bottomleft'
 )
 
 # Display the map in Streamlit
