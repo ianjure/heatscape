@@ -146,7 +146,8 @@ map = leafmap.Map(
     max_lat=bounds[3]+buffer,
     min_lon=bounds[0]-buffer,
     max_lon=bounds[2]+buffer,
-    control=False
+    control=False,
+    overlay=False
 )
 
 # Set visualization range
