@@ -181,4 +181,4 @@ folium.GeoJson(
 ).add_to(map)
 
 # Full-page map display
-map.to_streamlit(use_container_width=True, height=820)
+map.to_streamlit(use_container_width=True)
