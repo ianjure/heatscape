@@ -164,38 +164,39 @@ map.add_geojson(
     zoom_to_layer=False
 )
 
-# Full-page map display
-map.to_streamlit(use_container_width=True, height=820)
-
 # Set visualization range
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
-# Add choropleth layer (using simulated UHI values)
+# Add Folium Choropleth directly
 folium.Choropleth(
-    geo_data=sim_data,
+    geo_data=sim_data.__geo_interface__,  # Convert to GeoJSON dict
     data=sim_data,
-    name="UHI Intensity",
     columns=["barangay", "UHI_vis"],
     key_on="feature.properties.barangay",
     fill_color="YlOrRd",
     fill_opacity=0.7,
     line_opacity=0.2,
     legend_name="UHI Intensity (°C)",
-    bins=[0, 1, 2, 3, 4, 5]
+    bins=[0, 1, 2, 3, 4, 5],
+    name="UHI Intensity"
 ).add_to(map)
 
-# Add interactive tooltips
+# Add Folium tooltips
 folium.GeoJson(
     sim_data,
     style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
     tooltip=folium.GeoJsonTooltip(
         fields=["barangay", "UHI_index"],
-        aliases=["Barangay:", "UHI Intensity:"],
-        localize=True,
-        style=("font-weight: bold;")
-    )
+        aliases=["Barangay:", "UHI Intensity (°C):"],
+        style=("font-weight: bold; font-size: 12px;"),
+        sticky=True
+    ),
+    name="Tooltips"
 ).add_to(map)
+
+# Full-page map display
+map.to_streamlit(use_container_width=True, height=820)
 
 # Full-page map display
 #final_map = st_folium(map, use_container_width=True, height=820)
