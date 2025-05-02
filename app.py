@@ -160,16 +160,17 @@ vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
 # Add choropleth visualization
-map.add_data(
-    sim_data.to_json(),
-    value="UHI_index",
-    colors="YlOrRd",
-    bins=[0, 1, 2, 3, 4, 5],
+# Add styled vector layer
+m.add_vector(
+    sim_data,
     layer_name="UHI Intensity",
+    fill_colors=sim_data['color'].tolist(),
+    line_color="black",
+    line_width=0.5,
     fill_opacity=0.7,
-    line_opacity=0.2,
-    legend_title="UHI Intensity (°C)",
-    legend_kwds=dict(colorbar=False)  # Disable default legend
+    info_mode="on_hover",
+    tooltip=["barangay", "UHI_index"],
+    tooltip_style=("font-weight: bold; font-size: 12px;")
 )
 
 # Add custom styled tooltips
