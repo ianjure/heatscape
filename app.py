@@ -136,18 +136,13 @@ map = leafmap.Map(
     zoom_start=11,
     min_zoom=11,
     max_zoom=18,
-    tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-    attr = (
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
-        'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
-    ),
     max_bounds=True,
     min_lat=bounds[1]-buffer,
     max_lat=bounds[3]+buffer,
     min_lon=bounds[0]-buffer,
     max_lon=bounds[2]+buffer,
-    control=False,
-    overlay=False
+    control_scale=False,
+    search_control=False
 )
 
 # Set visualization range
