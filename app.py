@@ -179,4 +179,4 @@ folium.GeoJson(
 ).add_to(map)
 
 # Full-page map display
-st_folium(map, use_container_width=True, height=820)
+final_map = st_folium(map, use_container_width=True, height=820)
