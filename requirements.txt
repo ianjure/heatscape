@@ -4,6 +4,5 @@ geopandas
 folium
 streamlit
 streamlit-folium
-gdown
 joblib
 scikit-learn
