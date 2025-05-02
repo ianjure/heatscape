@@ -159,6 +159,15 @@ map = leafmap.Map(
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
+# Convert UHI_index to color
+def get_color(value, bins=[0,1,2,3,4,5], palette="YlOrRd"):
+    import matplotlib.colors as colors
+    norm = colors.BoundaryNorm(bins, len(palette))
+    cmap = colors.ListedColormap(plt.get_cmap(palette)(range(len(palette))))
+    return colors.to_hex(cmap(norm(value)[0]))
+
+sim_data['color'] = sim_data['UHI_index'].apply(get_color)
+
 # Add choropleth visualization
 # Add styled vector layer
 map.add_vector(
