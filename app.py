@@ -53,11 +53,7 @@ st.markdown(padding, unsafe_allow_html=True)
 # Load functions (cached for performance)
 @st.cache_resource
 def load_data():
-    url = "https://drive.google.com/uc?id=15pPzWmcpf-RFyxkoDnZo7DWP6OuaMjKA"
-    output = "geodata.parquet"
-    gdown.download(url, output, quiet=True)
-    geo = gpd.read_parquet("geodata.parquet")
-    cdo = geo[geo['adm3_psgc'] == 1030500000][['adm4_en', 'geometry']].rename(columns={'adm4_en': 'barangay'})
+    geo = gpd.read_parquet("cdo_geodata.parquet")
     features = pd.read_csv("latest_data.csv")
     return cdo.to_crs(epsg=4326), features
 
