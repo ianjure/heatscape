@@ -3,9 +3,7 @@ import geopandas as gpd
 
 import folium
 import streamlit as st
-#import leafmap.foliumap as leafmap
-import leafmap.leafmap as leafmap
-from branca.colormap import linear
+import leafmap.foliumap as leafmap
 
 import joblib
 from sklearn.pipeline import Pipeline
@@ -131,49 +129,61 @@ sim_data['UHI_index'] = predict_UHI(sim_data)
 sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
 
 # Create UHI map
-# Create leafmap Map
 bounds = sim_data.total_bounds
 buffer = 0.05
-m = leafmap.Map(
-    center=[8.48, 124.65],
-    zoom=11,
-    tiles="CartoDB.DarkMatterNoLabels",
-    draw_control=False,
-    measure_control=False,
-    search_control=False,
-    layers_control=False,
-    attribution_control=False,
+map = leafmap.Map(
+    location=[8.48, 124.65],
+    zoom_start=11,
+    min_zoom=11,
+    max_zoom=18,
+    tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+    attr = (
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
+        'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
+    ),
     max_bounds=True,
     min_lat=bounds[1]-buffer,
     max_lat=bounds[3]+buffer,
     min_lon=bounds[0]-buffer,
-    max_lon=bounds[2]+buffer
+    max_lon=bounds[2]+buffer,
+    control_scale=False,
+    draw_control=False,
+    measure_control=False,
+    search_control=False,
+    layers_control=False,
+    attribution_control=False
 )
 
-# Create color scale
-colormap = linear.YlOrRd_06.scale(
-    sim_data['UHI_index'].min(),
-    sim_data['UHI_index'].max()
-)
+# Set visualization range
+vmin, vmax = 0, 5
+sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
-# Add GeoJSON layer with styling
-m.add_geojson(
-    sim_data.to_json(),
-    layer_name="UHI Intensity",
-    style={
-        'opacity': 0.7,
-        'weight': 0.5,
-        'fillOpacity': 0.7,
-        'color': 'black'
-    },
-    hover_style={'fillOpacity': 0.9, 'weight': 1},
-    info_mode='on_hover',
-    zoom_to_layer=False,
-    tooltip=['barangay', 'UHI_index'],
-    tooltip_style=("font-weight: bold; font-size: 12px; background: white; padding: 5px;"),
-    colormap=colormap,
-    value_col='UHI_index'
-)
+# Add choropleth layer
+folium.Choropleth(
+    geo_data=sim_data.__geo_interface__,  # Convert to GeoJSON dict
+    data=sim_data,
+    columns=["barangay", "UHI_vis"],
+    key_on="feature.properties.barangay",
+    fill_color="YlOrRd",
+    fill_opacity=0.5,
+    line_opacity=0,
+    legend_name="UHI Intensity (°C)",
+    bins=[0, 1, 2, 3, 4, 5],
+    name="UHI Intensity"
+).add_to(map)
 
-# Display the map in Streamlit
-m.to_streamlit(use_container_width=True, height=800)
+# Add tooltips
+folium.GeoJson(
+    data=sim_data,
+    style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
+    tooltip=folium.GeoJsonTooltip(
+        fields=["barangay", "UHI_index"],
+        aliases=["Barangay:", "UHI Intensity (°C):"],
+        style=("font-weight: bold; font-size: 12px;"),
+        sticky=True
+    ),
+    name="Tooltips"
+).add_to(map)
+
+# Full-page map display
+map.to_streamlit(use_container_width=True)
