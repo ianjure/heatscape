@@ -132,6 +132,8 @@ sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
 
 # Create UHI map
 # Create leafmap Map
+bounds = sim_data.total_bounds
+buffer = 0.05
 m = leafmap.Map(
     center=[8.48, 124.65],
     zoom=11,
@@ -140,13 +142,13 @@ m = leafmap.Map(
     measure_control=False,
     search_control=False,
     layers_control=False,
-    attribution_control=False
+    attribution_control=False,
+    max_bounds=True,
+    min_lat=bounds[1]-buffer,
+    max_lat=bounds[3]+buffer,
+    min_lon=bounds[0]-buffer,
+    max_lon=bounds[2]+buffer
 )
-
-# Set map bounds
-bounds = sim_data.total_bounds
-buffer = 0.05
-m.fit_bounds([[bounds[1]-buffer, bounds[0]-buffer], [bounds[3]+buffer, bounds[2]+buffer]])
 
 # Create color scale
 colormap = linear.YlOrRd_06.scale(
