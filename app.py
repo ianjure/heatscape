@@ -161,7 +161,7 @@ sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
 # Add choropleth visualization
 # Add styled vector layer
-m.add_vector(
+map.add_vector(
     sim_data,
     layer_name="UHI Intensity",
     fill_colors=sim_data['color'].tolist(),
