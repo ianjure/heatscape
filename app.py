@@ -152,23 +152,6 @@ vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
 # Add choropleth layer
-map.add_geojson(
-    sim_data.to_json(),
-    layer_name="UHI Intensity",
-    fill_colors=["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c", "#bd0026", "#800026"],
-    style={
-        'fillOpacity': 0.7,
-        'weight': 0.5,
-        'color': 'black'
-    },
-    zoom_to_layer=False
-)
-
-# Set visualization range
-vmin, vmax = 0, 5
-sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
-
-# Add Folium Choropleth directly
 folium.Choropleth(
     geo_data=sim_data.__geo_interface__,  # Convert to GeoJSON dict
     data=sim_data,
@@ -182,9 +165,9 @@ folium.Choropleth(
     name="UHI Intensity"
 ).add_to(map)
 
-# Add Folium tooltips
+# Add tooltips
 folium.GeoJson(
-    sim_data,
+    data=sim_data,
     style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
     tooltip=folium.GeoJsonTooltip(
         fields=["barangay", "UHI_index"],
@@ -197,6 +180,3 @@ folium.GeoJson(
 
 # Full-page map display
 map.to_streamlit(use_container_width=True, height=820)
-
-# Full-page map display
-#final_map = st_folium(map, use_container_width=True, height=820)
