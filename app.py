@@ -159,32 +159,33 @@ map = leafmap.Map(
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
-# Add choropleth layer
-folium.Choropleth(
-    geo_data=sim_data.__geo_interface__,  # Convert to GeoJSON dict
-    data=sim_data,
-    columns=["barangay", "UHI_vis"],
-    key_on="feature.properties.barangay",
-    fill_color="YlOrRd",
-    fill_opacity=0.5,
-    line_opacity=0,
-    legend_name="UHI Intensity (°C)",
+# Add choropleth visualization
+map.add_choropleth(
+    sim_data.to_json(),
+    value="UHI_index",
+    colors="YlOrRd",
     bins=[0, 1, 2, 3, 4, 5],
-    name="UHI Intensity"
-).add_to(map)
+    layer_name="UHI Intensity",
+    fill_opacity=0.7,
+    line_opacity=0.2,
+    legend_title="UHI Intensity (°C)",
+    legend_kwds=dict(colorbar=False)  # Disable default legend
+)
 
-# Add tooltips
-folium.GeoJson(
-    data=sim_data,
-    style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
-    tooltip=folium.GeoJsonTooltip(
-        fields=["barangay", "UHI_index"],
-        aliases=["Barangay:", "UHI Intensity (°C):"],
-        style=("font-weight: bold; font-size: 12px;"),
-        sticky=True
-    ),
-    name="Tooltips"
-).add_to(map)
+# Add custom styled tooltips
+map.add_tooltip(
+    fields=["barangay", "UHI_index"],
+    aliases=["Barangay:", "UHI Intensity (°C):"],
+    style=("font-weight: bold; font-size: 12px; background: white; padding: 5px;")
+)
+
+# Add custom legend (optional)
+map.add_legend(
+    title="UHI Intensity (°C)",
+    colors=["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a"],
+    labels=["0-1", "1-2", "2-3", "3-4", "4-5", "5+"],
+    builtin_legend=None  # Disable auto-legend
+)
 
 # Full-page map display
 map.to_streamlit(use_container_width=True)
