@@ -126,6 +126,7 @@ def predict_UHI(data):
 
 # Apply predictions
 sim_data['UHI_index'] = predict_UHI(sim_data)
+sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
 
 # Create UHI map
 bounds = sim_data.total_bounds
