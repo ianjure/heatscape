@@ -155,47 +155,13 @@ map = leafmap.Map(
     attribution_control=False
 )
 
-# Set visualization range
-vmin, vmax = 0, 5
-sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
+from ipyleaflet import Map, LayersControl
 
-# Convert UHI_index to color
-def get_color(value, bins=[0,1,2,3,4,5], palette="YlOrRd"):
-    import matplotlib.colors as colors
-    norm = colors.BoundaryNorm(bins, len(palette))
-    cmap = colors.ListedColormap(plt.get_cmap(palette)(range(len(palette))))
-    return colors.to_hex(cmap(norm(value)[0]))
+# Create a layer control
+layer_control = LayersControl()
 
-sim_data['color'] = sim_data['UHI_index'].apply(get_color)
-
-# Add choropleth visualization
-# Add styled vector layer
-map.add_vector(
-    sim_data,
-    layer_name="UHI Intensity",
-    fill_colors=sim_data['color'].tolist(),
-    line_color="black",
-    line_width=0.5,
-    fill_opacity=0.7,
-    info_mode="on_hover",
-    tooltip=["barangay", "UHI_index"],
-    tooltip_style=("font-weight: bold; font-size: 12px;")
-)
-
-# Add custom styled tooltips
-map.add_tooltip(
-    fields=["barangay", "UHI_index"],
-    aliases=["Barangay:", "UHI Intensity (°C):"],
-    style=("font-weight: bold; font-size: 12px; background: white; padding: 5px;")
-)
-
-# Add custom legend (optional)
-map.add_legend(
-    title="UHI Intensity (°C)",
-    colors=["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a"],
-    labels=["0-1", "1-2", "2-3", "3-4", "4-5", "5+"],
-    builtin_legend=None  # Disable auto-legend
-)
+# Remove the layer control from the map
+m.remove_control(layer_control)
 
 # Full-page map display
 map.to_streamlit(use_container_width=True)
