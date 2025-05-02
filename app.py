@@ -131,7 +131,7 @@ sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
 # Create UHI map
 bounds = sim_data.total_bounds
 buffer = 0.05
-map = leafmap.Map(
+map = folium.Map(
     location=[8.48, 124.65],
     zoom_start=11,
     min_zoom=11,
