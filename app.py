@@ -1,9 +1,8 @@
 import pandas as pd
 import geopandas as gpd
 
-import folium
 import streamlit as st
-from streamlit_folium import st_folium
+import leafmap.foliumap as leafmap
 
 import joblib
 from sklearn.pipeline import Pipeline
@@ -127,11 +126,10 @@ def predict_UHI(data):
 # Apply predictions
 sim_data['UHI_index'] = predict_UHI(sim_data)
 
-# Create map
-import leafmap.foliumap as leafmap
+# Create UHI map
 bounds = sim_data.total_bounds
 buffer = 0.05
-m = leafmap.Map(
+map = leafmap.Map(
     location=[8.48, 124.65],
     zoom_start=11,
     min_zoom=11,
@@ -148,8 +146,13 @@ m = leafmap.Map(
     max_lon=bounds[2]+buffer,
     control_scale=False
 )
-# Add choropleth with tooltips
-m.add_geojson(
+
+# Set visualization range
+vmin, vmax = 0, 5
+sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
+
+# Add choropleth layer
+map.add_geojson(
     sim_data.to_json(),
     layer_name="UHI Intensity",
     fill_colors=["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c", "#bd0026", "#800026"],
@@ -160,26 +163,9 @@ m.add_geojson(
     },
     zoom_to_layer=False
 )
-# Display the map
-m.to_streamlit(use_container_width=True, height=820)
 
-map = folium.Map(
-    location=[8.48, 124.65],
-    zoom_start=11,
-    min_zoom=11,
-    max_zoom=18,
-    tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-    attr = (
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
-        'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
-    ),
-    max_bounds=True,
-    min_lat=bounds[1]-buffer,
-    max_lat=bounds[3]+buffer,
-    min_lon=bounds[0]-buffer,
-    max_lon=bounds[2]+buffer,
-    control_scale=False
-)
+# Full-page map display
+map.to_streamlit(use_container_width=True, height=820)
 
 # Set visualization range
 vmin, vmax = 0, 5
