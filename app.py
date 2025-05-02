@@ -4,7 +4,7 @@ import geopandas as gpd
 import folium
 import streamlit as st
 #import leafmap.foliumap as leafmap
-import leafmap
+import leafmap.leafmap as leafmap
 
 import joblib
 from sklearn.pipeline import Pipeline
@@ -155,13 +155,8 @@ map = leafmap.Map(
     attribution_control=False
 )
 
-from ipyleaflet import Map, LayersControl
-
-# Create a layer control
-layer_control = LayersControl()
-
-# Remove the layer control from the map
-map.remove_control(layer_control)
+for control in m.controls:
+    map.remove_control(control)
 
 # Full-page map display
 map.to_streamlit(use_container_width=True)
