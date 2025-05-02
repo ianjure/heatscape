@@ -48,6 +48,16 @@ padding = """
     """
 st.markdown(padding, unsafe_allow_html=True)
 
+# [LEAFMAP] REMOVE LAYER CONTROL
+layer = """
+    <style>
+    .leaflet-control-layers leaflet-control {
+        display: none;
+    }
+    </style>
+    """
+st.markdown(layer, unsafe_allow_html=True)
+
 # Load functions (cached for performance)
 @st.cache_resource
 def load_data():
