@@ -155,7 +155,7 @@ map = leafmap.Map(
     attribution_control=False
 )
 
-for control in m.controls:
+for control in map.controls:
     map.remove_control(control)
 
 # Full-page map display
