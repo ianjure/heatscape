@@ -176,4 +176,4 @@ m.add_geojson(
 )
 
 # Display the map in Streamlit
-m.to_streamlit(use_container_width=True)
+m.to_streamlit(use_container_width=True, height=800)
