@@ -6,7 +6,6 @@ import folium
 import streamlit as st
 from streamlit_folium import st_folium
 
-import gdown
 import joblib
 from sklearn.pipeline import Pipeline
 
