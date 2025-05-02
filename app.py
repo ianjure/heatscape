@@ -131,18 +131,20 @@ sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
 # Create UHI map
 bounds = sim_data.total_bounds
 buffer = 0.05
-map = folium.Map(
+map = leafmap.Map(
     location=[8.48, 124.65],
     zoom_start=11,
     min_zoom=11,
     max_zoom=18,
+    tiles="CartoDB.DarkMatterNoLabels",
     max_bounds=True,
     min_lat=bounds[1]-buffer,
     max_lat=bounds[3]+buffer,
     min_lon=bounds[0]-buffer,
     max_lon=bounds[2]+buffer,
     control_scale=False,
-    search_control=False
+    search_control=False,
+    layer_control=False
 )
 
 # Set visualization range
