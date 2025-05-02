@@ -51,7 +51,7 @@ st.markdown(padding, unsafe_allow_html=True)
 # [LEAFMAP] REMOVE LAYER CONTROL
 layer = """
     <style>
-    .leaflet-control-layers-toggle {
+    .leaflet-control-layers {
         display: none;
     }
     </style>
