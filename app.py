@@ -5,6 +5,7 @@ import folium
 import streamlit as st
 #import leafmap.foliumap as leafmap
 import leafmap.leafmap as leafmap
+from branca.colormap import linear
 
 import joblib
 from sklearn.pipeline import Pipeline
