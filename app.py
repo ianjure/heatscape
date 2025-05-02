@@ -185,5 +185,8 @@ folium.GeoJson(
     name="Tooltips"
 ).add_to(map)
 
+for control in map.controls:
+    map.remove_control(control)
+
 # Full-page map display
 map.to_streamlit(use_container_width=True)
