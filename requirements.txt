@@ -5,3 +5,4 @@ streamlit
 streamlit-folium
 joblib
 scikit-learn
+leafmap
