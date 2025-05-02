@@ -1,37 +1,140 @@
-import streamlit as st
-import folium
-from streamlit_folium import folium_static
 import geopandas as gpd
+import pandas as pd
 import numpy as np
+
+import folium
+import streamlit as st
+from streamlit_folium import st_folium
+
+import gdown
+import joblib
+from sklearn.pipeline import Pipeline
 
 # Configure page layout
 st.set_page_config(layout="wide")
 
-# App title and sidebar
-st.sidebar.title("UHI Simulation Controls")
-st.title("CDO Urban Heat Island Visualization")
+# [STREAMLIT] HIDE MENU
+hide_menu = """
+    <style>
+    #MainMenu {
+        visibility: hidden;
+    }
+    footer {
+        visibility: hidden;
+    }
+    div[data-testid="stDecoration"] {
+        visibility: hidden;
+        height: 0%;
+        position: fixed;
+    }
+    div[data-testid="stStatusWidget"] {
+        visibility: hidden;
+        height: 0%;
+        position: fixed;
+    }
+    [data-testid="stToolbar"] {
+        display: none;
+    }
+    </style>
+    """
+st.markdown(hide_menu, unsafe_allow_html=True)
 
-# Load data
+# [STREAMLIT] ADJUST PADDING
+padding = """
+    <style>
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 0rem;
+    }
+    </style>
+    """
+st.markdown(padding, unsafe_allow_html=True)
+
+# Load functions (cached for performance)
 @st.cache_data
-def load_geojson():
-    ph_barangays = gpd.read_file("PH_Adm4_BgySubMuns.zip")
-    cdo_barangays = ph_barangays[ph_barangays['adm3_psgc'] == 1030500000]
-    return cdo_barangays[['adm4_en', 'geometry']].rename(columns={'adm4_en': 'barangay'}).to_crs(epsg=4326)
+def load_data():
+    url = "https://drive.google.com/uc?id=15pPzWmcpf-RFyxkoDnZo7DWP6OuaMjKA"
+    output = "geodata.parquet"
+    gdown.download(url, output, quiet=True)
+    geo = gpd.read_parquet("geodata.parquet")
+    cdo = geo[geo['adm3_psgc'] == 1030500000][['adm4_en', 'geometry']].rename(columns={'adm4_en': 'barangay'})
+    features = pd.read_csv("latest_data.csv")
+    return cdo.to_crs(epsg=4326), features
 
-cdo_gdf = load_geojson()
+@st.cache_resource 
+def load_model():
+    return joblib.load("pipeline.joblib")
 
-# Simulation controls in sidebar
+# Load all data
+cdo_gdf, features_df = load_data()
+pipeline = load_model()
+
+# Merge features with geometries
+sim_data = cdo_gdf.merge(features_df, on='barangay')
+
+# Simulation controls
 with st.sidebar:
-    st.header("Simulation Parameters")
-    urban_heat = st.slider("Urban Heat Intensity", 0.0, 5.0, 2.5, 0.1)
-    vegetation = st.slider("Vegetation Coverage", 0.0, 1.0, 0.5, 0.01)
-    simulation_type = st.selectbox("Scenario", ["Current", "Future Projection", "Mitigation Scenario"])
+    st.title("Simulation Controls")
     
-    # Generate random UHI values for demo (replace with your model)
-    cdo_gdf['uhi'] = np.random.uniform(urban_heat-1, urban_heat+1, len(cdo_gdf)) * vegetation
+    with st.expander("🌱 Vegetation Indices"):
+        ndvi_adj = st.slider("NDVI Multiplier", 0.5, 1.5, 1.0, 0.01)
+        ndwi_adj = st.slider("NDWI Multiplier", 0.5, 1.5, 1.0, 0.01)
+        
+    with st.expander("🏗️ Urban Features"):
+        ndbi_adj = st.slider("NDBI Multiplier", 0.5, 1.5, 1.0, 0.01)
+        built_up_adj = st.slider("Built-up Area Multiplier", 0.5, 1.5, 1.0, 0.01)
+        
+    with st.expander("🌡️ Temperature"):
+        skin_temp_adj = st.slider("Skin Temp (°C)", -5.0, 5.0, 0.0, 0.1)
+        temp_2m_adj = st.slider("2m Air Temp (°C)", -5.0, 5.0, 0.0, 0.1)
+        
+    with st.expander("💧 Humidity"):
+        humidity_adj = st.slider("Humidity (%)", -10.0, 10.0, 0.0, 0.1)
+        temp_dew_adj = st.slider("Dew Point (°C)", -3.0, 3.0, 0.0, 0.1)
+        
+    with st.expander("🌤️ Radiation"):
+        albedo_adj = st.slider("Albedo", 0.8, 1.2, 1.0, 0.01)
+        incoming_sw_adj = st.slider("Solar Radiation (W/m²)", -50.0, 50.0, 0.0, 1.0)
+        
+    scenario = st.selectbox("Climate Scenario", ["Current", "RCP 4.5", "RCP 8.5"])
 
-# Calculate bounds with buffer
-bounds = cdo_gdf.total_bounds
+# Prediction function
+def predict_UHI(data):
+    # Create adjusted feature matrix
+    X_adj = pd.DataFrame({
+        'NDBI': data['NDBI'] * ndbi_adj,
+        'NDVI': data['NDVI'] * ndvi_adj,
+        'NDWI': data['NDWI'] * ndwi_adj,
+        'NO2': data['NO2'],  # No adjustment
+        'albedo': data['albedo'] * albedo_adj,
+        'aspect': data['aspect'],
+        'built_up': data['built_up'] * built_up_adj,
+        'elevation': data['elevation'],
+        'geopot_500': data['geopot_500'],
+        'humidity': data['humidity'] + humidity_adj,
+        'incoming_sw': data['incoming_sw'] + incoming_sw_adj,
+        'lcl_height': data['lcl_height'],
+        'net_radiation': data['net_radiation'],
+        'omega_500': data['omega_500'],
+        'pbl_height': data['pbl_height'],
+        'precipitable_water': data['precipitable_water'],
+        'radiation_ratio': data['radiation_ratio'],
+        'skin_temp': data['skin_temp'] + skin_temp_adj,
+        'slope': data['slope'],
+        'surface_pressure': data['surface_pressure'],
+        'temp_2m': data['temp_2m'] + temp_2m_adj,
+        'temp_850': data['temp_850'],
+        'temp_dew': data['temp_dew'] + temp_dew_adj,
+        'temp_wet': data['temp_wet']
+    })
+    # Scale and predict
+    return pipeline.predict(X_adj)
+
+# Apply predictions
+sim_data['UHI_index'] = predict_UHI(sim_data)
+
+# Create map
+bounds = sim_data.total_bounds
 buffer = 0.05
 map = folium.Map(
     location=[8.48, 124.65],
@@ -51,12 +154,16 @@ map = folium.Map(
     control_scale=False
 )
 
+# Set visualization range
+vmin, vmax = 0, 5
+sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
+
 # Add choropleth layer (using simulated UHI values)
 folium.Choropleth(
-    geo_data=cdo_gdf,
+    geo_data=sim_data,
+    data=sim_data,
     name="UHI Intensity",
-    data=cdo_gdf,
-    columns=["barangay", "uhi"],
+    columns=["barangay", "UHI_vis"],
     key_on="feature.properties.barangay",
     fill_color="YlOrRd",
     fill_opacity=0.7,
@@ -67,10 +174,10 @@ folium.Choropleth(
 
 # Add interactive tooltips
 folium.GeoJson(
-    cdo_gdf,
+    sim_data,
     style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
     tooltip=folium.GeoJsonTooltip(
-        fields=["barangay", "uhi"],
+        fields=["barangay", "UHI_index"],
         aliases=["Barangay:", "UHI Intensity:"],
         localize=True,
         style=("font-weight: bold;")
@@ -78,4 +185,4 @@ folium.GeoJson(
 ).add_to(map)
 
 # Full-page map display
-folium_static(map, width=1400, height=700)
+st_folium(map, use_container_width=True, height=820)
