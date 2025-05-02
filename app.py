@@ -131,24 +131,11 @@ sim_data['UHI_index'] = predict_UHI(sim_data)
 sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
 
 # Create UHI map
-bounds = sim_data.total_bounds
-buffer = 0.05
+# Create leafmap Map
 m = leafmap.Map(
-    location=[8.48, 124.65],
-    zoom_start=11,
-    min_zoom=11,
-    max_zoom=18,
-    tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-    attr = (
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
-        'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
-    ),
-    max_bounds=True,
-    min_lat=bounds[1]-buffer,
-    max_lat=bounds[3]+buffer,
-    min_lon=bounds[0]-buffer,
-    max_lon=bounds[2]+buffer,
-    control_scale=False,
+    center=[8.48, 124.65],
+    zoom=11,
+    tiles="CartoDB.DarkMatterNoLabels",
     draw_control=False,
     measure_control=False,
     search_control=False,
@@ -156,18 +143,10 @@ m = leafmap.Map(
     attribution_control=False
 )
 
-# Create ipyleaflet Map instance
-map = leafmap.Map(
-    center=(8.48, 124.65),
-    zoom=11,
-    basemap="CartoDB.DarkMatterNoLabels"  # Equivalent to your CartoDB tiles
-)
-
-# Disable all default controls
-map.scroll_wheel_zoom = True
-map.default_style = {"cursor": "default"}
-for control in map.controls:
-    map.remove_control(control)
+# Set map bounds
+bounds = sim_data.total_bounds
+buffer = 0.05
+m.fit_bounds([[bounds[1]-buffer, bounds[0]-buffer], [bounds[3]+buffer, bounds[2]+buffer]])
 
 # Create color scale
 colormap = linear.YlOrRd_06.scale(
@@ -175,43 +154,33 @@ colormap = linear.YlOrRd_06.scale(
     sim_data['UHI_index'].max()
 )
 
-# Add choropleth layer
-style = {
-    "opacity": 0.7,
-    "weight": 0.5,
-    "fillOpacity": 0.7,
-    "color": "black"
-}
-
-choropleth = leafmap.Choropleth(
-    geo_data=json.loads(sim_data.to_json()),
-    choro_data=sim_data[["barangay", "UHI_index"]],
+# Add GeoJSON layer with styling
+m.add_geojson(
+    sim_data.to_json(),
+    layer_name="UHI Intensity",
+    style={
+        'opacity': 0.7,
+        'weight': 0.5,
+        'fillOpacity': 0.7,
+        'color': 'black'
+    },
+    hover_style={'fillOpacity': 0.9, 'weight': 1},
+    info_mode='on_hover',
+    zoom_to_layer=False,
+    tooltip=['barangay', 'UHI_index'],
+    tooltip_style=("font-weight: bold; font-size: 12px; background: white; padding: 5px;"),
     colormap=colormap,
-    style=style,
-    key_on="feature.properties.barangay",
-    bins=[0, 1, 2, 3, 4, 5],
-    name="UHI Intensity"
+    value_col='UHI_index'
 )
-map.add_layer(choropleth)
-
-# Add hover tooltips
-tooltip = leafmap.GeoJSONTooltip(
-    fields=["barangay", "UHI_index"],
-    aliases=["Barangay:", "UHI Intensity (°C):"],
-    style=("font-weight: bold; font-size: 12px; background: white; padding: 5px;")
-)
-map.add_control(tooltip)
 
 # Add legend
-map.add_colormap(
-    colormap=colormap,
-    caption="UHI Intensity (°C)",
-    position="bottomleft"
+m.add_colorbar(
+    colors=colormap.colors,
+    vmin=sim_data['UHI_index'].min(),
+    vmax=sim_data['UHI_index'].max(),
+    caption='UHI Intensity (°C)',
+    position='bottomleft'
 )
 
-# Display in Streamlit
-from streamlit.components.v1 import html
-html(map.to_html(), height=820)
-
-# Full-page map display
-#map.to_streamlit(use_container_width=True)
+# Display the map in Streamlit
+m.to_streamlit(use_container_width=True)
