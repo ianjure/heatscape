@@ -160,7 +160,7 @@ vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
 # Add choropleth visualization
-map.add_choropleth(
+map.add_data(
     sim_data.to_json(),
     value="UHI_index",
     colors="YlOrRd",
