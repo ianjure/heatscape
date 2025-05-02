@@ -169,7 +169,8 @@ folium.Choropleth(
     line_opacity=0,
     legend_name="UHI Intensity (°C)",
     bins=[0, 1, 2, 3, 4, 5],
-    name="UHI Intensity"
+    name="UHI Intensity",
+    control=False
 ).add_to(map)
 
 # Add tooltips
@@ -182,11 +183,9 @@ folium.GeoJson(
         style=("font-weight: bold; font-size: 12px;"),
         sticky=True
     ),
-    name="Tooltips"
+    name="Tooltips",
+    control=False
 ).add_to(map)
-
-for control in map.controls:
-    map.remove_control(control)
 
 # Full-page map display
 map.to_streamlit(use_container_width=True)
