@@ -2,7 +2,6 @@ pandas
 geopandas
 folium
 streamlit
-streamlit-folium
+leafmap
 joblib
 scikit-learn
-leafmap
