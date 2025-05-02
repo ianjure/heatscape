@@ -159,8 +159,8 @@ folium.Choropleth(
     columns=["barangay", "UHI_vis"],
     key_on="feature.properties.barangay",
     fill_color="YlOrRd",
-    fill_opacity=0.7,
-    line_opacity=0.2,
+    fill_opacity=0.5,
+    line_opacity=0,
     legend_name="UHI Intensity (°C)",
     bins=[0, 1, 2, 3, 4, 5],
     name="UHI Intensity"
