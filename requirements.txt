@@ -5,3 +5,4 @@ streamlit
 leafmap
 joblib
 scikit-learn
+matplotlib
