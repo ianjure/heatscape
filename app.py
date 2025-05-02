@@ -147,6 +147,8 @@ map = leafmap.Map(
     layer_control=False
 )
 
+map.remove_layer_control()
+
 # Set visualization range
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
