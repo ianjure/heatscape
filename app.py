@@ -128,8 +128,41 @@ def predict_UHI(data):
 sim_data['UHI_index'] = predict_UHI(sim_data)
 
 # Create map
+import leafmap.foliumap as leafmap
 bounds = sim_data.total_bounds
 buffer = 0.05
+m = leafmap.Map(
+    location=[8.48, 124.65],
+    zoom_start=11,
+    min_zoom=11,
+    max_zoom=18,
+    tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+    attr = (
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> '
+        'contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
+    ),
+    max_bounds=True,
+    min_lat=bounds[1]-buffer,
+    max_lat=bounds[3]+buffer,
+    min_lon=bounds[0]-buffer,
+    max_lon=bounds[2]+buffer,
+    control_scale=False
+)
+# Add choropleth with tooltips
+m.add_geojson(
+    sim_data.to_json(),
+    layer_name="UHI Intensity",
+    fill_colors=["#ffffcc", "#ffeda0", "#fed976", "#feb24c", "#fd8d3c", "#fc4e2a", "#e31a1c", "#bd0026", "#800026"],
+    style={
+        'fillOpacity': 0.7,
+        'weight': 0.5,
+        'color': 'black'
+    },
+    zoom_to_layer=False
+)
+# Display the map
+m.to_streamlit(use_container_width=True, height=820)
+
 map = folium.Map(
     location=[8.48, 124.65],
     zoom_start=11,
@@ -179,4 +212,4 @@ folium.GeoJson(
 ).add_to(map)
 
 # Full-page map display
-final_map = st_folium(map, use_container_width=True, height=820)
+#final_map = st_folium(map, use_container_width=True, height=820)
