@@ -51,7 +51,7 @@ padding = """
 st.markdown(padding, unsafe_allow_html=True)
 
 # Load functions (cached for performance)
-@st.cache_data
+@st.cache_resource
 def load_data():
     url = "https://drive.google.com/uc?id=15pPzWmcpf-RFyxkoDnZo7DWP6OuaMjKA"
     output = "geodata.parquet"
