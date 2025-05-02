@@ -48,6 +48,13 @@ padding = """
     """
 st.markdown(padding, unsafe_allow_html=True)
 
+hide_layer_control = """
+<style>
+.leaflet-control-layers-toggle { display: none !important; }
+</style>
+"""
+st.markdown(hide_layer_control, unsafe_allow_html=True)
+
 # [LEAFMAP] REMOVE LAYER CONTROL
 layer = """
     <style>
