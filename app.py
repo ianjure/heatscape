@@ -51,7 +51,7 @@ st.markdown(padding, unsafe_allow_html=True)
 # Load functions (cached for performance)
 @st.cache_resource
 def load_data():
-    geo = gpd.read_parquet("cdo_geodata.parquet")
+    cdo = gpd.read_parquet("cdo_geodata.parquet")
     features = pd.read_csv("latest_data.csv")
     return cdo.to_crs(epsg=4326), features
 
