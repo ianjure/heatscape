@@ -59,6 +59,7 @@ iframe .leaflet-control-layers {
 """
 st.markdown(hide_layer_control, unsafe_allow_html=True)
 
+# [LEAFMAP] ADD MAP BORDER
 map_border_style = """
 <style>
 iframe {
@@ -163,16 +164,8 @@ map = leafmap.Map(
     max_lat=bounds[3]+buffer,
     min_lon=bounds[0]-buffer,
     max_lon=bounds[2]+buffer,
-    control_scale=False,
     search_control=False,
-    layer_control=False,
-    add_layer_control=False
 )
-
-# Ensure layer control is gone (double protection)
-for key in list(map.map._children):
-    if key.startswith("layer_control"):
-        del map.map._children[key]
 
 # Set visualization range
 vmin, vmax = 0, 5
