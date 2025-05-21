@@ -62,7 +62,7 @@ st.markdown(hide_layer_control, unsafe_allow_html=True)
 map_border_style = """
 <style>
 iframe {
-    border: 1px solid black !important;
+    border: 1px solid white !important;
     box-sizing: border-box;
 }
 </style>
@@ -168,6 +168,11 @@ map = leafmap.Map(
     layer_control=False,
     add_layer_control=False
 )
+
+# Ensure layer control is gone (double protection)
+for key in list(map.map._children):
+    if key.startswith("layer_control"):
+        del map.map._children[key]
 
 # Set visualization range
 vmin, vmax = 0, 5
