@@ -63,8 +63,9 @@ st.markdown(hide_layer_control, unsafe_allow_html=True)
 map_border_style = """
 <style>
 iframe {
-    border: 3px solid #4CAF50;  /* Green border */
-    border-radius: 10px;        /* Optional: rounded corners */
+    border: 3px solid black !important;  /* Make sure a border is shown */
+    border-radius: 10px;
+    box-sizing: border-box;
 }
 </style>
 """
