@@ -53,10 +53,22 @@ st.markdown(padding, unsafe_allow_html=True)
 # [LEAFMAP] REMOVE LAYER CONTROL
 hide_layer_control = """
 <style>
-.leaflet-control-layers leaflet-control { display: none !important; }
+.leaflet-control-layers {
+    display: none !important;
+}
 </style>
 """
 st.markdown(hide_layer_control, unsafe_allow_html=True)
+
+map_border_style = """
+<style>
+iframe {
+    border: 3px solid #4CAF50;  /* Green border */
+    border-radius: 10px;        /* Optional: rounded corners */
+}
+</style>
+"""
+st.markdown(map_border_style, unsafe_allow_html=True)
 
 # Load functions (cached for performance)
 @st.cache_resource
@@ -154,7 +166,8 @@ map = leafmap.Map(
     max_lon=bounds[2]+buffer,
     control_scale=False,
     search_control=False,
-    layer_control=False
+    layer_control=False,
+    add_layer_control=False
 )
 
 # Set visualization range
