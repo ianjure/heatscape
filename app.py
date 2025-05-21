@@ -49,22 +49,14 @@ padding = """
     """
 st.markdown(padding, unsafe_allow_html=True)
 
+
+# [LEAFMAP] REMOVE LAYER CONTROL
 hide_layer_control = """
 <style>
-.leaflet-control-layers-toggle { display: none !important; }
+.leaflet-control-layers leaflet-control { display: none !important; }
 </style>
 """
 st.markdown(hide_layer_control, unsafe_allow_html=True)
-
-# [LEAFMAP] REMOVE LAYER CONTROL
-layer = """
-    <style>
-    .leaflet-control-layers {
-        display: none;
-    }
-    </style>
-    """
-st.markdown(layer, unsafe_allow_html=True)
 
 # Load functions (cached for performance)
 @st.cache_resource
