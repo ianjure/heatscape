@@ -61,7 +61,7 @@ st.markdown(hide_layer_control, unsafe_allow_html=True)
 
 map_border_style = """
 <style>
-iframe[src*="leafmap"] {
+iframe {
     border: 1px solid black !important;
     box-sizing: border-box;
 }
