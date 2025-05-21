@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 
 # Configure page layout
 st.set_page_config(layout="wide")
-st.logo(image="logo.png")
+st.logo(image="logo.png", size="large")
 
 # [STREAMLIT] HIDE MENU
 hide_menu = """
