@@ -53,7 +53,7 @@ st.markdown(padding, unsafe_allow_html=True)
 # [LEAFMAP] REMOVE LAYER CONTROL
 hide_layer_control = """
 <style>
-.leaflet-control-layers {
+iframe .leaflet-control-layers {
     display: none !important;
 }
 </style>
@@ -63,8 +63,7 @@ st.markdown(hide_layer_control, unsafe_allow_html=True)
 map_border_style = """
 <style>
 iframe {
-    border: 3px solid black !important;  /* Make sure a border is shown */
-    border-radius: 10px;
+    border: 1px solid black !important;
     box-sizing: border-box;
 }
 </style>
