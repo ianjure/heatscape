@@ -161,7 +161,7 @@ model_features = ['NDBI', 'nighttime_lights', 'omega_500',
                   'microclimate_mod', 'dtr_proxy']
 sim_data['UHI_index'] = model.predict(sim_scaled[model_features]).round(3)
 
-col1, col2 = st.columns()
+col1, col2 = st.columns(2)
 with col1:
     # CREATE MAP
     bounds = sim_data.total_bounds
