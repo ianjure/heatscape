@@ -84,7 +84,7 @@ multiplier_default = 1.0
 multiplier_step = 0.05
 
 with st.sidebar:
-    with st.expander("🏙️ Urban Surface Features"):
+    with st.expander("🏙️ Urban Surface Features", expanded=True):
         ndbi_mult = st.slider(
             "Built Environment (NDBI) multiplier",
             min_value=multiplier_min,
@@ -102,7 +102,7 @@ with st.sidebar:
             help="Adjust nighttime light intensity as a multiplier of current value"
         )
     
-    with st.expander("🌬️ Atmospheric Conditions"):
+    with st.expander("🌬️ Atmospheric Conditions", expanded=True):
         omega_mult = st.slider(
             "Vertical Air Motion (ω500) multiplier",
             min_value=multiplier_min,
@@ -112,7 +112,7 @@ with st.sidebar:
             help="Adjust vertical atmospheric motion as a multiplier of current value"
         )
     
-    with st.expander("🌿 Cooling & Environment"):
+    with st.expander("🌿 Cooling & Environment", expanded=True):
         cooling_mult = st.slider(
             "Cooling Potential multiplier",
             min_value=multiplier_min,
