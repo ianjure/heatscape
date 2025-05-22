@@ -1,8 +1,8 @@
+streamlit
 pandas
 geopandas
-folium
-streamlit
-leafmap
 joblib
+folium
+leafmap
 scikit-learn
 ipyleaflet
