@@ -247,20 +247,6 @@ with col1:
         control=False
     ).add_to(map)
     
-    # ADD TOOLTIPS
-    folium.GeoJson(
-        data=sim_data,
-        style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
-        tooltip=folium.GeoJsonTooltip(
-            fields=["barangay", "UHI_index"],
-            aliases=["Barangay:", "UHI Intensity (°C):"],
-            style=("font-weight: bold; font-size: 12px;"),
-            sticky=True
-        ),
-        name="Tooltips",
-        control=False
-    ).add_to(map)
-    
     # DISPLAY MAP
     map.to_streamlit(width=None, height=800, add_layer_control=False)
 
