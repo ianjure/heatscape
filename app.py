@@ -249,7 +249,6 @@ with col2:
     
     # Format the UHI values to 3 decimal places but keep numeric version for styling
     display_df = all_barangays.copy()
-    display_df['UHI_numeric'] = display_df['UHI_index']  # Keep numeric version
     display_df['UHI_index'] = display_df['UHI_index'].map(lambda x: f"{x:.3f}")  # Format for display
     
     # Define a function to style each cell based on UHI value
