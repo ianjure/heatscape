@@ -75,46 +75,52 @@ model = load_model()
 # MERGE FEATURES WITH GEOMETRIES
 sim_data = cdo_gdf.merge(features_df, on='barangay')
 
-# SIMULATION CONTROLS
-with st.sidebar:
-    st.title("🧪 Simulate UHI Factors")
+# GET MIN-MAX DATA
+info_df = pd.read_csv("all_info.csv", index_col=0)
 
-    with st.expander("🏙️ Urban Surface Features"):
-        ndbi_multiplier = st.slider("Built Environment (NDBI)", 0.5, 1.5, 1.0, 0.01,
-                                    help="Scales the built-up index of each barangay")
-        night_lights_multiplier = st.slider("Artificial Lighting", 0.5, 1.5, 1.0, 0.01,
-                                           help="Scales nighttime light intensity")
+# SIMULATION LOGIC
+level_labels = ["Very Low", "Low", "Medium", "High", "Very High"]
+level_values = [0, 0.25, 0.5, 0.75, 1.0]  # MAP TO MIN-MAX INTERPOLATION
+
+def scale_value(feature, level):
+    min_val = info_df.loc["min", feature]
+    max_val = info_df.loc["max", feature]
+    return min_val + (max_val - min_val) * level
+
+with st.expander("🏙️ Urban Surface Features"):
+        ndbi_level = st.select_slider("Built Environment (NDBI)", level_labels, value="Medium",
+                                      help="Adjust built-up index intensity")
+        nlights_level = st.select_slider("Artificial Lighting", level_labels, value="Medium",
+                                         help="Adjust nighttime light intensity")
 
     with st.expander("🌬️ Atmospheric Conditions"):
-        omega_500_multiplier = st.slider("Vertical Air Motion (ω500)", 0.5, 1.5, 1.0, 0.01,
-                                        help="Scales vertical motion values at 500hPa")
+        omega_level = st.select_slider("Vertical Air Motion (ω500)", level_labels, value="Medium",
+                                       help="Adjust vertical atmospheric motion")
 
     with st.expander("🌿 Cooling & Environment"):
-        cooling_capacity_multiplier = st.slider("Cooling Potential", 0.5, 1.5, 1.0, 0.01,
-                                               help="Scales the potential cooling capacity")
-        canyon_effect_multiplier = st.slider("Urban Canyon Effect", 0.5, 1.5, 1.0, 0.01,
-                                            help="Scales building structure and canyon effects")
-        microclimate_mod_multiplier = st.slider("Microclimate Modifier", 0.5, 1.5, 1.0, 0.01,
-                                               help="Scales the modifier for local microclimates")
-        dtr_proxy_multiplier = st.slider("Day-Night Temp Range (DTR)", 0.5, 1.5, 1.0, 0.01,
-                                        help="Scales the range between day and night temps")
-        
-# PREDICTION FUNCTION
-def predict_UHI(data):
-    X_adj = pd.DataFrame({
-        'NDBI': data['NDBI'] * ndbi_multiplier,
-        'nighttime_lights': data['nighttime_lights'] * night_lights_multiplier,
-        'omega_500': data['omega_500'] * omega_500_multiplier,
-        'cooling_capacity': data['cooling_capacity'] * cooling_capacity_multiplier,
-        'canyon_effect': data['canyon_effect'] * canyon_effect_multiplier,
-        'microclimate_mod': data['microclimate_mod'] * microclimate_mod_multiplier,
-        'dtr_proxy': data['dtr_proxy'] * dtr_proxy_multiplier,
-    })
-    return model.predict(X_adj)
+        cooling_level = st.select_slider("Cooling Potential", level_labels, value="Medium",
+                                         help="Adjust cooling capacity of green spaces and surfaces")
+        canyon_level = st.select_slider("Urban Canyon Effect", level_labels, value="Medium",
+                                        help="Adjust building canyon trapping effect")
+        micro_level = st.select_slider("Microclimate Modifier", level_labels, value="Medium",
+                                       help="Adjust local modifiers like shade or humidity")
+        dtr_level = st.select_slider("Day-Night Temp Range (DTR)", level_labels, value="Medium",
+                                     help="Adjust the range between daytime and nighttime temperatures")
+
+# APPLY SCALED VALUES BASED ON LEVELS
+X_adj = pd.DataFrame({
+    'NDBI': scale_value('NDBI', level_values[level_labels.index(ndbi_level)]),
+    'nighttime_lights': scale_value('nighttime_lights', level_values[level_labels.index(nlights_level)]),
+    'omega_500': scale_value('omega_500', level_values[level_labels.index(omega_level)]),
+    'cooling_capacity': scale_value('cooling_capacity', level_values[level_labels.index(cooling_level)]),
+    'canyon_effect': scale_value('canyon_effect', level_values[level_labels.index(canyon_level)]),
+    'microclimate_mod': scale_value('microclimate_mod', level_values[level_labels.index(micro_level)]),
+    'dtr_proxy': scale_value('dtr_proxy', level_values[level_labels.index(dtr_level)]),
+}, index=sim_data.index)
 
 # APPLY PREDICTIONS
-sim_data['UHI_index'] = predict_UHI(sim_data)
-sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
+X_full = pd.concat([X_adj] * len(sim_data)).reset_index(drop=True)
+sim_data['UHI_index'] = model.predict(X_full).round(3)
 
 # CREATE MAP
 bounds = sim_data.total_bounds
@@ -134,8 +140,7 @@ map = leafmap.Map(
 )
 
 # SET VISUALIZATION RANGE
-vmin, vmax = 0, 5
-sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
+sim_data['UHI_vis'] = sim_data['UHI_index'].clip(0, 5)
 
 # ADD CHOROPLETH LAYER
 folium.Choropleth(
