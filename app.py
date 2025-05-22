@@ -280,3 +280,15 @@ with col2:
         height=400,  # Match map height
         use_container_width=True
     )
+
+    # Add summary metrics using st.metric
+    avg_uhi = sim_data['UHI_index'].mean().round(3)
+    hottest_barangay = sim_data.loc[sim_data['UHI_index'].idxmax()]
+    coolest_barangay = sim_data.loc[sim_data['UHI_index'].idxmin()]
+
+    st.markdown("### 🔍 Summary Metrics")
+    m1, m2, m3 = st.columns(3)
+
+    m1.metric("Average UHI Index", f"{avg_uhi} °C")
+    m2.metric("Hottest Barangay", hottest_barangay['barangay'], f"{hottest_barangay['UHI_index']:.3f} °C")
+    m3.metric("Coolest Barangay", coolest_barangay['barangay'], f"{coolest_barangay['UHI_index']:.3f} °C")
