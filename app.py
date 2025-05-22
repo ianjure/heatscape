@@ -7,7 +7,7 @@ import leafmap.foliumap as leafmap
 import branca.colormap as cm
 
 # CONFIGURE PAGE LAYOUT
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 st.logo(image="logo.png", size="large")
 
 # [STREAMLIT] HIDE MENU
@@ -238,7 +238,7 @@ with col1:
 
     # Display map
     st.subheader("🗺️ UHI Distribution Map")
-    map.to_streamlit(height=600, width=None, add_layer_control=False)
+    map.to_streamlit(height=595, width=None, add_layer_control=False)
 
 with col2:
     # Get all barangays sorted by UHI index
