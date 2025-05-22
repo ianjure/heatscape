@@ -213,7 +213,7 @@ with col1:
     ).add_to(map)
     
     # DISPLAY MAP
-    map.to_streamlit(width=None, height=100, add_layer_control=False)
+    map.to_streamlit(width=None, height=1000, add_layer_control=False)
 
 with col2:
     # Add a table showing all barangays with scrolling capability
