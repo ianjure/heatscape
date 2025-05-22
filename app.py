@@ -145,20 +145,21 @@ with st.sidebar:
             help="Adjust the range between daytime and nighttime temperatures as a multiplier of current value"
         )
 
-# APPLY MULTIPLIERS TO CURRENT FEATURE VALUES PER BARANGAY
-X_adj = pd.DataFrame({
-    'NDBI': sim_data['NDBI'] * ndbi_mult,
-    'nighttime_lights': sim_data['nighttime_lights'] * nlights_mult,
-    'omega_500': sim_data['omega_500'] * omega_mult,
-    'cooling_capacity': sim_data['cooling_capacity'] * cooling_mult,
-    'canyon_effect': sim_data['canyon_effect'] * canyon_mult,
-    'microclimate_mod': sim_data['microclimate_mod'] * micro_mult,
-    'dtr_proxy': sim_data['dtr_proxy'] * dtr_mult,
-}, index=sim_data.index)
+# APPLY MULTIPLIERS TO FEATURE VALUES
+sim_scaled = sim_data.copy()
+sim_scaled['NDBI'] *= ndbi_mult
+sim_scaled['nighttime_lights'] *= nlights_mult
+sim_scaled['omega_500'] *= omega_mult
+sim_scaled['cooling_capacity'] *= cooling_mult
+sim_scaled['canyon_effect'] *= canyon_mult
+sim_scaled['microclimate_mod'] *= micro_mult
+sim_scaled['dtr_proxy'] *= dtr_mult
 
 # APPLY PREDICTIONS
-model_inputs = X_adj.reset_index(drop=True)
-sim_data['UHI_index'] = model.predict(model_inputs).round(3)
+model_features = ['NDBI', 'nighttime_lights', 'omega_500',
+                  'cooling_capacity', 'canyon_effect',
+                  'microclimate_mod', 'dtr_proxy']
+sim_data['UHI_index'] = model.predict(sim_scaled[model_features]).round(3)
 
 # CREATE MAP
 bounds = sim_data.total_bounds
