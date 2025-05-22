@@ -110,7 +110,7 @@ def predict_UHI(data):
         'microclimate_mod': [microclimate_mod] * len(data),
         'dtr_proxy': [dtr_proxy] * len(data),
     })
-    return model.predict(X_adj)
+    return model.predict(adjusted_df)
 
 # APPLY PREDICTIONS
 sim_data['UHI_index'] = predict_UHI(sim_data)
