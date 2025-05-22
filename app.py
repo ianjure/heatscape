@@ -82,67 +82,68 @@ multiplier_max = 1.5
 multiplier_default = 1.0
 multiplier_step = 0.05
 
-with st.expander("🏙️ Urban Surface Features"):
-    ndbi_mult = st.slider(
-        "Built Environment (NDBI) multiplier",
-        min_value=multiplier_min,
-        max_value=multiplier_max,
-        value=multiplier_default,
-        step=multiplier_step,
-        help="Adjust built-up index intensity as a multiplier of current value"
-    )
-    nlights_mult = st.slider(
-        "Artificial Lighting multiplier",
-        min_value=multiplier_min,
-        max_value=multiplier_max,
-        value=multiplier_default,
-        step=multiplier_step,
-        help="Adjust nighttime light intensity as a multiplier of current value"
-    )
-
-with st.expander("🌬️ Atmospheric Conditions"):
-    omega_mult = st.slider(
-        "Vertical Air Motion (ω500) multiplier",
-        min_value=multiplier_min,
-        max_value=multiplier_max,
-        value=multiplier_default,
-        step=multiplier_step,
-        help="Adjust vertical atmospheric motion as a multiplier of current value"
-    )
-
-with st.expander("🌿 Cooling & Environment"):
-    cooling_mult = st.slider(
-        "Cooling Potential multiplier",
-        min_value=multiplier_min,
-        max_value=multiplier_max,
-        value=multiplier_default,
-        step=multiplier_step,
-        help="Adjust cooling capacity of green spaces and surfaces as a multiplier of current value"
-    )
-    canyon_mult = st.slider(
-        "Urban Canyon Effect multiplier",
-        min_value=multiplier_min,
-        max_value=multiplier_max,
-        value=multiplier_default,
-        step=multiplier_step,
-        help="Adjust building canyon trapping effect as a multiplier of current value"
-    )
-    micro_mult = st.slider(
-        "Microclimate Modifier multiplier",
-        min_value=multiplier_min,
-        max_value=multiplier_max,
-        value=multiplier_default,
-        step=multiplier_step,
-        help="Adjust local modifiers like shade or humidity as a multiplier of current value"
-    )
-    dtr_mult = st.slider(
-        "Day-Night Temp Range (DTR) multiplier",
-        min_value=multiplier_min,
-        max_value=multiplier_max,
-        value=multiplier_default,
-        step=multiplier_step,
-        help="Adjust the range between daytime and nighttime temperatures as a multiplier of current value"
-    )
+with st.sidebar:
+    with st.expander("🏙️ Urban Surface Features"):
+        ndbi_mult = st.slider(
+            "Built Environment (NDBI) multiplier",
+            min_value=multiplier_min,
+            max_value=multiplier_max,
+            value=multiplier_default,
+            step=multiplier_step,
+            help="Adjust built-up index intensity as a multiplier of current value"
+        )
+        nlights_mult = st.slider(
+            "Artificial Lighting multiplier",
+            min_value=multiplier_min,
+            max_value=multiplier_max,
+            value=multiplier_default,
+            step=multiplier_step,
+            help="Adjust nighttime light intensity as a multiplier of current value"
+        )
+    
+    with st.expander("🌬️ Atmospheric Conditions"):
+        omega_mult = st.slider(
+            "Vertical Air Motion (ω500) multiplier",
+            min_value=multiplier_min,
+            max_value=multiplier_max,
+            value=multiplier_default,
+            step=multiplier_step,
+            help="Adjust vertical atmospheric motion as a multiplier of current value"
+        )
+    
+    with st.expander("🌿 Cooling & Environment"):
+        cooling_mult = st.slider(
+            "Cooling Potential multiplier",
+            min_value=multiplier_min,
+            max_value=multiplier_max,
+            value=multiplier_default,
+            step=multiplier_step,
+            help="Adjust cooling capacity of green spaces and surfaces as a multiplier of current value"
+        )
+        canyon_mult = st.slider(
+            "Urban Canyon Effect multiplier",
+            min_value=multiplier_min,
+            max_value=multiplier_max,
+            value=multiplier_default,
+            step=multiplier_step,
+            help="Adjust building canyon trapping effect as a multiplier of current value"
+        )
+        micro_mult = st.slider(
+            "Microclimate Modifier multiplier",
+            min_value=multiplier_min,
+            max_value=multiplier_max,
+            value=multiplier_default,
+            step=multiplier_step,
+            help="Adjust local modifiers like shade or humidity as a multiplier of current value"
+        )
+        dtr_mult = st.slider(
+            "Day-Night Temp Range (DTR) multiplier",
+            min_value=multiplier_min,
+            max_value=multiplier_max,
+            value=multiplier_default,
+            step=multiplier_step,
+            help="Adjust the range between daytime and nighttime temperatures as a multiplier of current value"
+        )
 
 # APPLY MULTIPLIERS TO CURRENT FEATURE VALUES PER BARANGAY
 X_adj = pd.DataFrame({
