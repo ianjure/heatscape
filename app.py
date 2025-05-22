@@ -104,7 +104,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust built-up index intensity (Normalized Difference Built-up Index - NDBI)."
+            help="Built-up index intensity (Normalized Difference Built-up Index)."
         )
         nlights_mult = st.slider(
             "More or Less Artificial Lights",
@@ -112,7 +112,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust nighttime light intensity from satellite observations."
+            help="Nighttime light intensity from satellite observations."
         )
     
     with st.expander("🌬️ Atmospheric Conditions", expanded=False):
@@ -122,7 +122,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust vertical atmospheric motion (omega at 500 hPa level)."
+            help="Vertical atmospheric motion (omega at 500 hPa level)."
         )
     
     with st.expander("🌿 Cooling & Environment", expanded=False):
@@ -132,7 +132,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust cooling potential of green spaces and heat-absorbing surfaces."
+            help="Cooling potential of green spaces and heat-absorbing surfaces."
         )
         canyon_mult = st.slider(
             "More or Less Trapped Heat Between Buildings",
@@ -140,7 +140,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust the urban canyon effect from dense, tall buildings."
+            help="The urban canyon effect from dense, tall buildings."
         )
         micro_mult = st.slider(
             "Local Shade or Moisture Changes",
@@ -148,7 +148,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust microclimate modifiers like shading and surface moisture."
+            help="Microclimate modifiers like shading and surface moisture."
         )
         dtr_mult = st.slider(
             "Bigger or Smaller Day-Night Temp Gaps",
@@ -156,7 +156,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust the diurnal temperature range (difference between day and night temps)."
+            help="Diurnal temperature range (difference between day and night temps)."
         )
 
 # APPLY MULTIPLIERS TO FEATURE VALUES
