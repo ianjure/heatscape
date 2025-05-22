@@ -289,6 +289,6 @@ with col2:
     st.markdown("### 🔍 Summary Metrics")
     m1, m2, m3 = st.columns(3)
 
-    m1.metric("Average UHI Index", f"{avg_uhi} °C")
-    m2.metric("Hottest Barangay", hottest_barangay['barangay'], f"{hottest_barangay['UHI_index']:.3f} °C")
-    m3.metric("Coolest Barangay", coolest_barangay['barangay'], f"{coolest_barangay['UHI_index']:.3f} °C")
+    m1.metric("Average UHI Index", f"{avg_uhi.round(3)} °C", border=False)
+    m2.metric("Hottest Barangay", hottest_barangay['barangay'], f"{hottest_barangay['UHI_index']:.3f} °C", border=False)
+    m3.metric("Coolest Barangay", coolest_barangay['barangay'], f"{coolest_barangay['UHI_index']:.3f} °C", border=False)
