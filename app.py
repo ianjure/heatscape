@@ -90,8 +90,14 @@ sim_data['barangay'] = sim_data['barangay'].str.replace(r'\bBarangay\b', 'Brgy',
 
 # MULTIPLIER SLIDER PARAMETERS
 # Range from 0.5x (half current) to 1.5x (50% increase)
-multiplier_min = 0.5
-multiplier_max = 1.5
+# multiplier_min = 0.5
+# multiplier_max = 1.5
+#multiplier_default = 1.0
+#multiplier_step = 0.05
+
+# Range from 0.1x (10% of current) to 2.0x (double current)
+multiplier_min = 0.1
+multiplier_max = 2.0
 multiplier_default = 1.0
 multiplier_step = 0.05
 
