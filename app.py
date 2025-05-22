@@ -146,7 +146,7 @@ with st.expander("🌿 Cooling & Environment"):
 
 # APPLY MULTIPLIERS TO CURRENT FEATURE VALUES PER BARANGAY
 X_adj = pd.DataFrame({
-    'NDBI': sim_data['NDBI'] * ndbi_mult,
+    'NDBI': sim_data['NDBI'] * -ndbi_mult,
     'nighttime_lights': sim_data['nighttime_lights'] * nlights_mult,
     'omega_500': sim_data['omega_500'] * omega_mult,
     'cooling_capacity': sim_data['cooling_capacity'] * cooling_mult,
