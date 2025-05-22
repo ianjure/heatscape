@@ -171,7 +171,6 @@ with col1:
         zoom_start=11,
         min_zoom=11,
         max_zoom=18,
-        tiles="CartoDB.PositronNoLabels",
         max_bounds=True,
         min_lat=bounds[1]-buffer,
         max_lat=bounds[3]+buffer,
@@ -213,7 +212,7 @@ with col1:
     ).add_to(map)
     
     # DISPLAY MAP
-    map.to_streamlit(width=None, height=1000, add_layer_control=False)
+    map.to_streamlit(width=None, height=800, add_layer_control=False)
 
 with col2:
     # Add a table showing all barangays with scrolling capability
