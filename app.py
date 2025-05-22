@@ -161,54 +161,98 @@ model_features = ['NDBI', 'nighttime_lights', 'omega_500',
                   'microclimate_mod', 'dtr_proxy']
 sim_data['UHI_index'] = model.predict(sim_scaled[model_features]).round(3)
 
-# CREATE MAP
-bounds = sim_data.total_bounds
-buffer = 0.05
-map = leafmap.Map(
-    location=[8.48, 124.65],
-    zoom_start=11,
-    min_zoom=11,
-    max_zoom=18,
-    tiles="CartoDB.PositronNoLabels",
-    max_bounds=True,
-    min_lat=bounds[1]-buffer,
-    max_lat=bounds[3]+buffer,
-    min_lon=bounds[0]-buffer,
-    max_lon=bounds[2]+buffer,
-    search_control=False,
-)
+with col1:
+    # CREATE MAP
+    bounds = sim_data.total_bounds
+    buffer = 0.05
+    map = leafmap.Map(
+        location=[8.48, 124.65],
+        zoom_start=11,
+        min_zoom=11,
+        max_zoom=18,
+        tiles="CartoDB.PositronNoLabels",
+        max_bounds=True,
+        min_lat=bounds[1]-buffer,
+        max_lat=bounds[3]+buffer,
+        min_lon=bounds[0]-buffer,
+        max_lon=bounds[2]+buffer,
+        search_control=False,
+    )
+    
+    # SET VISUALIZATION RANGE
+    sim_data['UHI_vis'] = sim_data['UHI_index'].clip(0, 5)
+    
+    # ADD CHOROPLETH LAYER
+    folium.Choropleth(
+        geo_data=sim_data.__geo_interface__,
+        data=sim_data,
+        columns=["barangay", "UHI_vis"],
+        key_on="feature.properties.barangay",
+        fill_color="YlOrRd",
+        fill_opacity=0.5,
+        line_opacity=0,
+        legend_name="UHI Intensity (°C)",
+        bins=[0, 1, 2, 3, 4, 5],
+        name="UHI Intensity",
+        control=False
+    ).add_to(map)
+    
+    # ADD TOOLTIPS
+    folium.GeoJson(
+        data=sim_data,
+        style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
+        tooltip=folium.GeoJsonTooltip(
+            fields=["barangay", "UHI_index"],
+            aliases=["Barangay:", "UHI Intensity (°C):"],
+            style=("font-weight: bold; font-size: 12px;"),
+            sticky=True
+        ),
+        name="Tooltips",
+        control=False
+    ).add_to(map)
+    
+    # DISPLAY MAP
+    map.to_streamlit(use_container_width=True)
 
-# SET VISUALIZATION RANGE
-sim_data['UHI_vis'] = sim_data['UHI_index'].clip(0, 5)
-
-# ADD CHOROPLETH LAYER
-folium.Choropleth(
-    geo_data=sim_data.__geo_interface__,
-    data=sim_data,
-    columns=["barangay", "UHI_vis"],
-    key_on="feature.properties.barangay",
-    fill_color="YlOrRd",
-    fill_opacity=0.5,
-    line_opacity=0,
-    legend_name="UHI Intensity (°C)",
-    bins=[0, 1, 2, 3, 4, 5],
-    name="UHI Intensity",
-    control=False
-).add_to(map)
-
-# ADD TOOLTIPS
-folium.GeoJson(
-    data=sim_data,
-    style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
-    tooltip=folium.GeoJsonTooltip(
-        fields=["barangay", "UHI_index"],
-        aliases=["Barangay:", "UHI Intensity (°C):"],
-        style=("font-weight: bold; font-size: 12px;"),
-        sticky=True
-    ),
-    name="Tooltips",
-    control=False
-).add_to(map)
-
-# DISPLAY MAP
-map.to_streamlit(use_container_width=True)
+with col2:
+    # Add a table showing all barangays with scrolling capability
+    st.subheader("Barangays by UHI Intensity")
+    
+    # Get all barangays sorted by UHI index
+    all_barangays = sim_data[['barangay', 'UHI_index']].sort_values(by='UHI_index', ascending=False).reset_index(drop=True)
+    
+    # Format the UHI values to 3 decimal places but keep numeric version for styling
+    display_df = all_barangays.copy()
+    display_df['UHI_numeric'] = display_df['UHI_index']  # Keep numeric version
+    display_df['UHI_index'] = display_df['UHI_index'].map(lambda x: f"{x:.3f}")  # Format for display
+    
+    # Define a function to style each cell based on UHI value
+    def color_uhi_values(val):
+        if not isinstance(val, str):
+            return ''
+        
+        try:
+            val_float = float(val)
+            # Use our same color function to ensure consistent coloring
+            color = get_color(val_float)
+            
+            # Return the styling for the cell - use white text for darker backgrounds
+            dark_colors = ['#ff6b39', '#cc0000']
+            text_color = "white" if color in dark_colors else "black"
+            
+            return f'background-color: {color}; color: {text_color}; font-weight: bold'
+        except:
+            return ''
+    
+    # Apply styling to the UHI_index column only
+    styled_table = display_df.style.applymap(
+        color_uhi_values, 
+        subset=['UHI_index']
+    )
+    
+    # Display the table with fixed height and scrolling
+    st.dataframe(
+        styled_table,
+        height=400,  # Match map height
+        use_container_width=True
+    )
