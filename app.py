@@ -1,8 +1,6 @@
 import streamlit as st
-
 import pandas as pd
 import geopandas as gpd
-
 import joblib
 import folium
 import leafmap.foliumap as leafmap
@@ -88,34 +86,52 @@ feature_info = {
     "dtr_proxy": ("Diurnal Temp Range", "Temperature fluctuation between day and night – proxy for heat retention.")
 }
 
-levels = ["Very Low", "Low", "Medium", "High", "Very High"]
 info_df = pd.read_csv("info.csv", index_col=0)
 
-def map_levels_to_values(feature):
+def get_feature_stats(feature):
+    """Get min, max, and current values for each feature"""
     min_val = info_df.loc["min", feature]
     max_val = info_df.loc["max", feature]
-    return {
-        "Very Low": min_val,
-        "Low": min_val + 0.25 * (max_val - min_val),
-        "Medium": min_val + 0.5 * (max_val - min_val),
-        "High": min_val + 0.75 * (max_val - min_val),
-        "Very High": max_val
-    }
+    current_val = features_df[feature].iloc[0]  # Get the first value as default
+    return min_val, max_val, current_val
 
 with st.sidebar:
     st.title("Simulation Controls")
     st.markdown("Adjust each feature to simulate changes in the Urban Heat Island index.")
     sliders = {}
 
+    # Let user select which barangay to use as reference
+    selected_barangay = st.selectbox(
+        "Select Barangay for Default Values",
+        options=features_df['barangay'].unique(),
+        index=0
+    )
+    
+    # Get the data for selected barangay
+    barangay_data = features_df[features_df['barangay'] == selected_barangay].iloc[0]
+
     for feature, (label, tooltip) in feature_info.items():
-        value_map = map_levels_to_values(feature)
-        selected_level = st.select_slider(
-            label=label,
-            options=levels,
-            value="Medium",
-            help=tooltip
-        )
-        sliders[feature] = value_map[selected_level]
+        min_val, max_val, _ = get_feature_stats(feature)
+        current_val = barangay_data[feature]  # Get value for selected barangay
+        
+        # Create two columns for the low/high labels and slider
+        col1, col2, col3 = st.columns([1, 4, 1])
+        with col1:
+            st.markdown("**Low**", help="Minimum value")
+        with col3:
+            st.markdown("**High**", help="Maximum value")
+        with col2:
+            value = st.slider(
+                label=label,
+                min_value=float(min_val),
+                max_value=float(max_val),
+                value=float(current_val),  # Set to current barangay's value
+                step=float((max_val - min_val)/100),  # Small step for precision
+                format="%.3f",
+                help=tooltip,
+                label_visibility="collapsed"
+            )
+            sliders[feature] = value
 
     scenario = st.selectbox("Climate Scenario", ["Current", "RCP 4.5", "RCP 8.5"])
 
