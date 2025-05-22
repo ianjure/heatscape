@@ -305,8 +305,8 @@ with col2:
     st.subheader("🔍 Summary Metrics")
     m1, m2, m3 = st.columns(3)
     m1.metric("Average UHI Index", f"{avg_uhi:.3f} °C", border=True)
-    m2.metric(f"Hottest Barangay ({hottest_barangay['UHI_index']:.3f} °C)", hottest_barangay['barangay'], border=True)
-    m3.metric(f"Coolest Barangay ({coolest_barangay['UHI_index']:.3f} °C)", coolest_barangay['barangay'], border=True)
+    m2.metric(f"Hottest Barangay", hottest_barangay['barangay'], border=True)
+    m3.metric(f"Coolest Barangay", coolest_barangay['barangay'], border=True)
 
     # FORMAT THE DATAFRAME
     all_barangays = sim_data[['barangay', 'UHI_index']].sort_values(by='UHI_index', ascending=False).reset_index(drop=True)
