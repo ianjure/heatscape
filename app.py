@@ -76,38 +76,55 @@ model = load_model()
 sim_data = cdo_gdf.merge(features_df, on='barangay')
 
 # SIMULATION CONTROLS
-feature_info = {
-    "NDBI": ("Urban Density", "Normalized Difference Built-up Index – higher values mean more urban surfaces."),
-    "nighttime_lights": ("Nighttime Lights", "Brightness at night – proxy for human activity and infrastructure."),
-    "omega_500": ("Air Motion (500 hPa)", "Vertical air motion – influences heat dispersion and cloud formation."),
-    "cooling_capacity": ("Cooling Capacity", "Natural ability of area to cool itself – higher magnitude means more cooling."),
-    "canyon_effect": ("Urban Canyon Effect", "Buildings trap heat – higher values mean stronger canyon effect."),
-    "microclimate_mod": ("Microclimate Modifier", "Land cover's impact on local temperature, humidity, and wind."),
-    "dtr_proxy": ("Diurnal Temp Range", "Temperature fluctuation between day and night – proxy for heat retention.")
-}
-
-info_df = pd.read_csv("info.csv", index_col=0)
-
 with st.sidebar:
     st.title("Simulation Controls")
-    st.markdown("Adjust each feature to simulate changes in the Urban Heat Island index using multipliers.")
-    sliders = {}
-
-    for feature, (label, tooltip) in feature_info.items():
-        sliders[feature] = st.slider(
-            label=f"{label} Multiplier",
-            min_value=0.5,
-            max_value=1.5,
-            value=1.0,
-            step=0.01,
-            help=tooltip)
+    st.markdown("Adjust each feature to simulate UHI changes using multipliers.")
+    
+    with st.expander("🏙️ Urban Form"):
+        ndbi_mult = st.slider(
+            "Urban Density Multiplier", 0.5, 1.5, 1.0, 0.01,
+            help="Normalized Difference Built-up Index – higher values mean more urban surfaces."
+        )
+        lights_mult = st.slider(
+            "Nighttime Lights Multiplier", 0.5, 1.5, 1.0, 0.01,
+            help="Brightness at night – proxy for human activity and infrastructure."
+        )
+        canyon_mult = st.slider(
+            "Urban Canyon Effect Multiplier", 0.5, 1.5, 1.0, 0.01,
+            help="Buildings trap heat – higher values mean stronger canyon effect."
+        )
+        
+    with st.expander("🌡️ Heat & Airflow"):
+        omega_mult = st.slider(
+            "Air Motion (500 hPa) Multiplier", 0.5, 1.5, 1.0, 0.01,
+            help="Vertical air motion – influences heat dispersion and cloud formation."
+        )
+        cooling_mult = st.slider(
+            "Cooling Capacity Multiplier", 0.5, 1.5, 1.0, 0.01,
+            help="Natural ability of area to cool itself – higher values reduce UHI."
+        )
+        dtr_mult = st.slider(
+            "Diurnal Temp Range Multiplier", 0.5, 1.5, 1.0, 0.01,
+            help="Temperature difference between day and night – relates to heat retention."
+        )
+        
+    with st.expander("🌿 Microclimate"):
+        microclimate_mult = st.slider(
+            "Microclimate Modifier Multiplier", 0.5, 1.5, 1.0, 0.01,
+            help="Land cover's impact on local temperature, humidity, and wind."
+        )
         
 # PREDICTION FUNCTION
 def predict_UHI(data):
     X_adj = data.copy()
     X_adj = X_adj.drop(columns=['barangay', 'geometry'])
-    for feat in sliders:
-        X_adj[feat] = sliders[feat]
+    X_adj['NDBI'] = X_adj['NDBI'] * ndbi_mult
+    X_adj['nighttime_lights'] = X_adj['nighttime_lights'] * lights_mult
+    X_adj['omega_500'] = X_adj['omega_500'] * omega_mult
+    X_adj['cooling_capacity'] = X_adj['cooling_capacity'] * cooling_mult
+    X_adj['canyon_effect'] = X_adj['canyon_effect'] * canyon_mult
+    X_adj['microclimate_mod'] = X_adj['microclimate_mod'] * microclimate_mult
+    X_adj['dtr_proxy'] = X_adj['dtr_proxy'] * dtr_mult
     return model.predict(X_adj)
 
 # APPLY PREDICTIONS
