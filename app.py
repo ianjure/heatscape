@@ -75,6 +75,7 @@ model = load_model()
 
 # MERGE FEATURES WITH GEOMETRIES
 sim_data = cdo_gdf.merge(features_df, on='barangay')
+sim_data = sim_data.rename(columns={'barangay': 'Brgy'})
 
 # MULTIPLIER SLIDER PARAMETERS
 # Range from 0.5x (half current) to 1.5x (50% increase)
