@@ -168,20 +168,41 @@ with st.sidebar:
 
 # APPLY MULTIPLIERS TO FEATURE VALUES
 sim_scaled = sim_data.copy()
-ndbi_min, ndbi_max = -0.6, 0.134
+ndbi_min, ndbi_max = -0.639, 0.134
+nlights_min, nlights_max = 0.0, 51.856
+omega_min, omega_max = -0.332, 0.054
+cooling_min, cooling_max = -26629.1, -1.226
+canyon_min, canyon_max = 0.540, 76162.57
+micro_min, micro_max = -56.091, 1.958
+dtr_min, dtr_max = 0.060, 1.265
+
 sim_scaled['NDBI_norm'] = (sim_scaled['NDBI'] - ndbi_min) / (ndbi_max - ndbi_min)
-
-# Apply multiplier
 sim_scaled['NDBI_norm'] *= ndbi_mult
-
-# (Optional) Rescale back if needed
 sim_scaled['NDBI'] = sim_scaled['NDBI_norm'] * (ndbi_max - ndbi_min) + ndbi_min
-sim_scaled['nighttime_lights'] *= nlights_mult
-sim_scaled['omega_500'] *= omega_mult
-sim_scaled['cooling_capacity'] *= cooling_mult
-sim_scaled['canyon_effect'] *= canyon_mult
-sim_scaled['microclimate_mod'] *= micro_mult
-sim_scaled['dtr_proxy'] *= dtr_mult
+
+sim_scaled['nighttime_lights_norm'] = (sim_scaled['nighttime_lights'] - nlights_min) / (nlights_max - nlights_min)
+sim_scaled['nighttime_lights_norm'] *= nlights_mult
+sim_scaled['nighttime_lights'] = sim_scaled['nighttime_lights_norm'] * (nlights_max - nlights_min) + nlights_min
+
+sim_scaled['omega_500_norm'] = (sim_scaled['omega_500'] - omega_min) / (omega_max - omega_min)
+sim_scaled['omega_500_norm'] *= omega_mult
+sim_scaled['omega_500'] = sim_scaled['omega_500_norm'] * (omega_max - omega_min) + omega_min
+
+sim_scaled['cooling_capacity_norm'] = (sim_scaled['cooling_capacity'] - cooling_min) / (cooling_max - cooling_min)
+sim_scaled['cooling_capacity_norm'] *= cooling_mult
+sim_scaled['cooling_capacity'] = sim_scaled['cooling_capacity_norm'] * (cooling_max - cooling_min) + cooling_min
+
+sim_scaled['canyon_effect_norm'] = (sim_scaled['canyon_effect'] - canyon_min) / (canyon_max - canyon_min)
+sim_scaled['canyon_effect_norm'] *= canyon_mult
+sim_scaled['canyon_effect'] = sim_scaled['canyon_effect_norm'] * (canyon_max - canyon_min) + canyon_min
+
+sim_scaled['microclimate_mod_norm'] = (sim_scaled['microclimate_mod'] - micro_min) / (micro_max - micro_min)
+sim_scaled['microclimate_mod_norm'] *= micro_mult
+sim_scaled['microclimate_mod'] = sim_scaled['microclimate_mod_norm'] * (micro_max - micro_min) + micro_min
+
+sim_scaled['dtr_proxy_norm'] = (sim_scaled['dtr_proxy'] - dtr_min) / (dtr_max - dtr_min)
+sim_scaled['dtr_proxy_norm'] *= dtr_mult
+sim_scaled['dtr_proxy'] = sim_scaled['dtr_proxy_norm'] * (dtr_max - dtr_min) + dtr_min
 
 # APPLY PREDICTIONS
 model_features = ['NDBI', 'nighttime_lights', 'omega_500',
