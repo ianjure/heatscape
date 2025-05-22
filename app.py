@@ -75,52 +75,89 @@ model = load_model()
 # MERGE FEATURES WITH GEOMETRIES
 sim_data = cdo_gdf.merge(features_df, on='barangay')
 
-# GET MIN-MAX DATA
-info_df = pd.read_csv("all_info.csv", index_col=0)
-
-# SIMULATION LOGIC
-level_labels = ["Very Low", "Low", "Medium", "High", "Very High"]
-level_values = [0, 0.25, 0.5, 0.75, 1.0]  # MAP TO MIN-MAX INTERPOLATION
-
-def scale_value(feature, level):
-    min_val = info_df.loc["min", feature]
-    max_val = info_df.loc["max", feature]
-    return min_val + (max_val - min_val) * level
+# MULTIPLIER SLIDER PARAMETERS
+# Range from 0.5x (half current) to 1.5x (50% increase)
+multiplier_min = 0.5
+multiplier_max = 1.5
+multiplier_default = 1.0
+multiplier_step = 0.05
 
 with st.expander("🏙️ Urban Surface Features"):
-        ndbi_level = st.select_slider("Built Environment (NDBI)", level_labels, value="Medium",
-                                      help="Adjust built-up index intensity")
-        nlights_level = st.select_slider("Artificial Lighting", level_labels, value="Medium",
-                                         help="Adjust nighttime light intensity")
+    ndbi_mult = st.slider(
+        "Built Environment (NDBI) multiplier",
+        min_value=multiplier_min,
+        max_value=multiplier_max,
+        value=multiplier_default,
+        step=multiplier_step,
+        help="Adjust built-up index intensity as a multiplier of current value"
+    )
+    nlights_mult = st.slider(
+        "Artificial Lighting multiplier",
+        min_value=multiplier_min,
+        max_value=multiplier_max,
+        value=multiplier_default,
+        step=multiplier_step,
+        help="Adjust nighttime light intensity as a multiplier of current value"
+    )
 
-    with st.expander("🌬️ Atmospheric Conditions"):
-        omega_level = st.select_slider("Vertical Air Motion (ω500)", level_labels, value="Medium",
-                                       help="Adjust vertical atmospheric motion")
+with st.expander("🌬️ Atmospheric Conditions"):
+    omega_mult = st.slider(
+        "Vertical Air Motion (ω500) multiplier",
+        min_value=multiplier_min,
+        max_value=multiplier_max,
+        value=multiplier_default,
+        step=multiplier_step,
+        help="Adjust vertical atmospheric motion as a multiplier of current value"
+    )
 
-    with st.expander("🌿 Cooling & Environment"):
-        cooling_level = st.select_slider("Cooling Potential", level_labels, value="Medium",
-                                         help="Adjust cooling capacity of green spaces and surfaces")
-        canyon_level = st.select_slider("Urban Canyon Effect", level_labels, value="Medium",
-                                        help="Adjust building canyon trapping effect")
-        micro_level = st.select_slider("Microclimate Modifier", level_labels, value="Medium",
-                                       help="Adjust local modifiers like shade or humidity")
-        dtr_level = st.select_slider("Day-Night Temp Range (DTR)", level_labels, value="Medium",
-                                     help="Adjust the range between daytime and nighttime temperatures")
+with st.expander("🌿 Cooling & Environment"):
+    cooling_mult = st.slider(
+        "Cooling Potential multiplier",
+        min_value=multiplier_min,
+        max_value=multiplier_max,
+        value=multiplier_default,
+        step=multiplier_step,
+        help="Adjust cooling capacity of green spaces and surfaces as a multiplier of current value"
+    )
+    canyon_mult = st.slider(
+        "Urban Canyon Effect multiplier",
+        min_value=multiplier_min,
+        max_value=multiplier_max,
+        value=multiplier_default,
+        step=multiplier_step,
+        help="Adjust building canyon trapping effect as a multiplier of current value"
+    )
+    micro_mult = st.slider(
+        "Microclimate Modifier multiplier",
+        min_value=multiplier_min,
+        max_value=multiplier_max,
+        value=multiplier_default,
+        step=multiplier_step,
+        help="Adjust local modifiers like shade or humidity as a multiplier of current value"
+    )
+    dtr_mult = st.slider(
+        "Day-Night Temp Range (DTR) multiplier",
+        min_value=multiplier_min,
+        max_value=multiplier_max,
+        value=multiplier_default,
+        step=multiplier_step,
+        help="Adjust the range between daytime and nighttime temperatures as a multiplier of current value"
+    )
 
-# APPLY SCALED VALUES BASED ON LEVELS
+# APPLY MULTIPLIERS TO CURRENT FEATURE VALUES PER BARANGAY
 X_adj = pd.DataFrame({
-    'NDBI': scale_value('NDBI', level_values[level_labels.index(ndbi_level)]),
-    'nighttime_lights': scale_value('nighttime_lights', level_values[level_labels.index(nlights_level)]),
-    'omega_500': scale_value('omega_500', level_values[level_labels.index(omega_level)]),
-    'cooling_capacity': scale_value('cooling_capacity', level_values[level_labels.index(cooling_level)]),
-    'canyon_effect': scale_value('canyon_effect', level_values[level_labels.index(canyon_level)]),
-    'microclimate_mod': scale_value('microclimate_mod', level_values[level_labels.index(micro_level)]),
-    'dtr_proxy': scale_value('dtr_proxy', level_values[level_labels.index(dtr_level)]),
+    'NDBI': sim_data['NDBI'] * ndbi_mult,
+    'nighttime_lights': sim_data['nighttime_lights'] * nlights_mult,
+    'omega_500': sim_data['omega_500'] * omega_mult,
+    'cooling_capacity': sim_data['cooling_capacity'] * cooling_mult,
+    'canyon_effect': sim_data['canyon_effect'] * canyon_mult,
+    'microclimate_mod': sim_data['microclimate_mod'] * micro_mult,
+    'dtr_proxy': sim_data['dtr_proxy'] * dtr_mult,
 }, index=sim_data.index)
 
 # APPLY PREDICTIONS
-X_full = pd.concat([X_adj] * len(sim_data)).reset_index(drop=True)
-sim_data['UHI_index'] = model.predict(X_full).round(3)
+model_inputs = X_adj.reset_index(drop=True)
+sim_data['UHI_index'] = model.predict(model_inputs).round(3)
 
 # CREATE MAP
 bounds = sim_data.total_bounds
