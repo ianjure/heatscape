@@ -294,11 +294,22 @@ with col1:
     st.subheader("🗺️ UHI Distribution Map")
     map.to_streamlit(height=580, width=None, add_layer_control=False)
 
-# TABLE AND METRIC SECTION
+# METRICS AND TABLE SECTION
 with col2:
-    all_barangays = sim_data[['barangay', 'UHI_index']].sort_values(by='UHI_index', ascending=False).reset_index(drop=True)
+    # CALCULATE SUMMARY METRICS
+    avg_uhi = sim_data['UHI_index'].mean().round(3)
+    hottest_barangay = sim_data.loc[sim_data['UHI_index'].idxmax()]
+    coolest_barangay = sim_data.loc[sim_data['UHI_index'].idxmin()]
+
+    # DISPLAY THE METRICS
+    st.subheader("🔍 Summary Metrics")
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Average UHI Index", f"{avg_uhi:.3f} °C", border=True)
+    m2.metric(f"Hottest Barangay ({hottest_barangay['UHI_index']:.3f} °C)", hottest_barangay['barangay'], border=True)
+    m3.metric(f"Coolest Barangay ({coolest_barangay['UHI_index']:.3f} °C)", coolest_barangay['barangay'], border=True)
 
     # FORMAT THE DATAFRAME
+    all_barangays = sim_data[['barangay', 'UHI_index']].sort_values(by='UHI_index', ascending=False).reset_index(drop=True)
     display_df = all_barangays.copy()
     display_df['UHI_index'] = display_df['UHI_index'].map(lambda x: f"{x:.3f}")
     display_df = display_df.rename(columns={"barangay":"Barangay", "UHI_index":"UHI Index"})
@@ -322,15 +333,3 @@ with col2:
     # DISPLAY THE TABLE
     st.subheader("📍Barangays by UHI Intensity")
     st.dataframe(styled_table, height=400, use_container_width=True)
-
-    # CALCULATE SUMMARY METRICS
-    avg_uhi = sim_data['UHI_index'].mean().round(3)
-    hottest_barangay = sim_data.loc[sim_data['UHI_index'].idxmax()]
-    coolest_barangay = sim_data.loc[sim_data['UHI_index'].idxmin()]
-
-    # DISPLAY THE METRICS
-    st.subheader("🔍 Summary Metrics")
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Average UHI Index", f"{avg_uhi:.3f} °C", border=True)
-    m2.metric(f"Hottest Barangay ({hottest_barangay['UHI_index']:.3f} °C)", hottest_barangay['barangay'], border=True)
-    m3.metric(f"Coolest Barangay ({coolest_barangay['UHI_index']:.3f} °C)", coolest_barangay['barangay'], border=True)
