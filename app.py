@@ -96,7 +96,7 @@ multiplier_default = 1.0
 multiplier_step = 0.05
 
 with st.sidebar:
-    st.subheader("🎛️ Simulation Controls")
+    st.title("🎛️ Simulation Controls")
     
     with st.expander("🏙️ Urban Surface Features", expanded=True):
         ndbi_mult = st.slider(
