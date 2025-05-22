@@ -218,9 +218,6 @@ sim_data['UHI_index'] = model.predict(sim_scaled[model_features]).round(3)
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
-# FORMAT UHI INDEX
-sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
-
 # DASHBOARD SECTIONS
 col1, col2 = st.columns(2)
 
@@ -274,12 +271,15 @@ with col1:
             'opacity': 0.9
         }
 
+    # FORMAT UHI INDEX
+    sim_data['UHI_index_str'] = sim_data['UHI_index'].apply(lambda x: f"{x:.3f}")
+
     # ADD GEOJSON LAYER
     folium.GeoJson(
         data=sim_data,
         style_function=style_function,
         tooltip=folium.GeoJsonTooltip(
-            fields=["barangay", "UHI_index"],
+            fields=["barangay", "UHI_index_str"],
             aliases=["Barangay:", "UHI Intensity (°C):"],
             style=("font-weight: bold; font-size: 12px;"),
             sticky=True
