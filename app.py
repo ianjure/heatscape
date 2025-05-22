@@ -286,35 +286,8 @@ with col2:
     coolest_barangay = sim_data.loc[sim_data['UHI_index'].idxmin()]
 
     st.markdown("### 🔍 Summary Metrics")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        with st.container(border=True):
-            st.markdown(f"""
-                <div style="text-align: center;">
-                    <strong>Average UHI Index</strong><br>
-                    <span style="font-size: 2rem;">{avg_uhi:.3f} °C</span>
-                    <span style="font-size: 0.4em;"></span>
-                </div>
-            """, unsafe_allow_html=True)
-
-    with col2:
-        with st.container(border=True):
-            st.markdown(f"""
-                <div style="text-align: center;">
-                    <strong>Hottest Barangay</strong><br>
-                    <span style="font-size: 1.5em;">{hottest_barangay['barangay']}</span><br>
-                    <span style="font-size: 0.9em;">{hottest_barangay['UHI_index']:.3f} °C</span>
-                </div>
-            """, unsafe_allow_html=True)
-
-    with col3:
-        with st.container(border=True):
-            st.markdown(f"""
-                <div style="text-align: center;">
-                    <strong>Coolest Barangay</strong><br>
-                    <span style="font-size: 1.5em;">{coolest_barangay['barangay']}</span><br>
-                    <span style="font-size: 0.9em;">{coolest_barangay['UHI_index']:.3f} °C</span>
-                </div>
-            """, unsafe_allow_html=True)
+    
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Average UHI Index", f"{avg_uhi:.3f} °C", border=True)
+    m2.metric(f"Hottest Barangay ({hottest_barangay['UHI_index']:.3f} °C)", hottest_barangay['barangay'], border=True)
+    m3.metric(f"Coolest Barangay ({coolest_barangay['UHI_index']:.3f} °C)", coolest_barangay['barangay'], border=True)
