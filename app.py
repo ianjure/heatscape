@@ -77,54 +77,39 @@ sim_data = cdo_gdf.merge(features_df, on='barangay')
 
 # SIMULATION CONTROLS
 with st.sidebar:
-    st.title("Simulation Controls")
-    st.markdown("Adjust each feature to simulate UHI changes using multipliers.")
-    
-    with st.expander("🏙️ Urban Form"):
-        ndbi_mult = st.slider(
-            "Urban Density Multiplier", 0.5, 1.5, 1.0, 0.01,
-            help="Normalized Difference Built-up Index – higher values mean more urban surfaces."
-        )
-        lights_mult = st.slider(
-            "Nighttime Lights Multiplier", 0.5, 1.5, 1.0, 0.01,
-            help="Brightness at night – proxy for human activity and infrastructure."
-        )
-        canyon_mult = st.slider(
-            "Urban Canyon Effect Multiplier", 0.5, 1.5, 1.0, 0.01,
-            help="Buildings trap heat – higher values mean stronger canyon effect."
-        )
-        
-    with st.expander("🌡️ Heat & Airflow"):
-        omega_mult = st.slider(
-            "Air Motion (500 hPa) Multiplier", 0.5, 1.5, 1.0, 0.01,
-            help="Vertical air motion – influences heat dispersion and cloud formation."
-        )
-        cooling_mult = st.slider(
-            "Cooling Capacity Multiplier", 0.5, 1.5, 1.0, 0.01,
-            help="Natural ability of area to cool itself – higher values reduce UHI."
-        )
-        dtr_mult = st.slider(
-            "Diurnal Temp Range Multiplier", 0.5, 1.5, 1.0, 0.01,
-            help="Temperature difference between day and night – relates to heat retention."
-        )
-        
-    with st.expander("🌿 Microclimate"):
-        microclimate_mult = st.slider(
-            "Microclimate Modifier Multiplier", 0.5, 1.5, 1.0, 0.01,
-            help="Land cover's impact on local temperature, humidity, and wind."
-        )
+    st.title("🧪 Simulate UHI Factors")
+
+    with st.expander("🏙️ Urban Surface Features"):
+        ndbi = st.slider("Built Environment (NDBI)", -0.64, 0.13, 0.0, 0.01,
+                         help="Normalized Difference Built-up Index: Higher = more built-up area")
+        night_lights = st.slider("Artificial Lighting", 0.0, 51.86, 10.0, 0.1,
+                                 help="Nighttime light intensity: proxy for urban activity")
+
+    with st.expander("🌬️ Atmospheric Conditions"):
+        omega_500 = st.slider("Vertical Air Motion (ω500)", -0.33, 0.05, -0.1, 0.01,
+                              help="Vertical pressure velocity at 500 hPa: indicates rising/sinking air")
+
+    with st.expander("🌿 Cooling & Environment"):
+        cooling_capacity = st.slider("Cooling Potential", -26629.1, -1.23, -10000.0, 10.0,
+                                     help="Net energy available for cooling (higher is better)")
+        canyon_effect = st.slider("Urban Canyon Effect", 0.54, 76162.57, 5000.0, 100.0,
+                                  help="Influence of building geometry on heat trapping")
+        microclimate_mod = st.slider("Microclimate Modifier", -56.09, 1.96, 0.0, 0.1,
+                                     help="Factor accounting for small-scale temperature variance")
+        dtr_proxy = st.slider("Day-Night Temp Range (DTR)", 0.06, 1.27, 0.8, 0.01,
+                              help="Proxy for diurnal temperature range")
         
 # PREDICTION FUNCTION
 def predict_UHI(data):
-    X_adj = data.copy()
-    X_adj = X_adj.drop(columns=['barangay', 'geometry'])
-    X_adj['NDBI'] = X_adj['NDBI'] * ndbi_mult
-    X_adj['nighttime_lights'] = X_adj['nighttime_lights'] * lights_mult
-    X_adj['omega_500'] = X_adj['omega_500'] * omega_mult
-    X_adj['cooling_capacity'] = X_adj['cooling_capacity'] * cooling_mult
-    X_adj['canyon_effect'] = X_adj['canyon_effect'] * canyon_mult
-    X_adj['microclimate_mod'] = X_adj['microclimate_mod'] * microclimate_mult
-    X_adj['dtr_proxy'] = X_adj['dtr_proxy'] * dtr_mult
+    adjusted_df = pd.DataFrame({
+        'NDBI': [ndbi] * len(data),
+        'nighttime_lights': [night_lights] * len(data),
+        'omega_500': [omega_500] * len(data),
+        'cooling_capacity': [cooling_capacity] * len(data),
+        'canyon_effect': [canyon_effect] * len(data),
+        'microclimate_mod': [microclimate_mod] * len(data),
+        'dtr_proxy': [dtr_proxy] * len(data),
+    })
     return model.predict(X_adj)
 
 # APPLY PREDICTIONS
