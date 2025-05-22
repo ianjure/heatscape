@@ -1,11 +1,11 @@
+import streamlit as st
+
 import pandas as pd
 import geopandas as gpd
 
-import folium
-import streamlit as st
-import leafmap.foliumap as leafmap
-
 import joblib
+import folium
+import leafmap.foliumap as leafmap
 
 # CONFIGURE PAGE LAYOUT
 st.set_page_config(layout="wide")
@@ -77,7 +77,7 @@ model = load_model()
 # MERGE FEATURES WITH GEOMETRIES
 sim_data = cdo_gdf.merge(features_df, on='barangay')
 
-# --- Sidebar controls with simplified names and tooltips ---
+# SIMULATION CONTROLS
 feature_info = {
     "NDBI": ("Urban Density", "Normalized Difference Built-up Index – higher values mean more urban surfaces."),
     "nighttime_lights": ("Nighttime Lights", "Brightness at night – proxy for human activity and infrastructure."),
