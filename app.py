@@ -96,6 +96,7 @@ multiplier_step = 0.05
 
 with st.sidebar:
     st.title("🎛️ Simulation Controls")
+    st.markdown("**How it works:** Adjust the sliders to simulate changes in your environment. Each slider uses a multiplier to increase or decrease the influence of a specific factor on Urban Heat. A value of 1.0 means no change, while lower or higher values represent less or more impact.")
     
     with st.expander("🏙️ Urban Surface Features", expanded=True):
         ndbi_mult = st.slider(
