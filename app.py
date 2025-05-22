@@ -110,7 +110,7 @@ def predict_UHI(data):
         'microclimate_mod': data['microclimate_mod'] * (microclimate_mod / 0.0 if 0.0 != 0 else 1),
         'dtr_proxy': data['dtr_proxy'] * (dtr_proxy / 0.8),
     })
-    return pipeline.predict(X_adj)
+    return model.predict(X_adj)
 
 # APPLY PREDICTIONS
 sim_data['UHI_index'] = predict_UHI(sim_data)
