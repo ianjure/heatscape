@@ -289,7 +289,7 @@ with col2:
 
     col1, col2, col3 = st.columns(3)
 
-     with col1:
+    with col1:
         with st.container(border=True):
             st.markdown(f"""
                 <div style="text-align: center;">
