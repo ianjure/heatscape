@@ -69,6 +69,16 @@ div[data-testid="stMetricValue"] {
 """
 st.markdown(metric_value, unsafe_allow_html=True)
 
+# [STREAMLIT] METRIC BACKGROUND COLOR
+metric_background = """
+<style>
+div[data-testid="stMetric"] {
+    background: white;
+}
+</style>
+"""
+st.markdown(metric_background, unsafe_allow_html=True)
+
 # LOAD FUNCTIONS (CACHED FOR PERFORMANCE)
 @st.cache_resource
 def load_data():
