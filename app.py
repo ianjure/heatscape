@@ -162,47 +162,51 @@ model_features = ['NDBI', 'nighttime_lights', 'omega_500',
                   'microclimate_mod', 'dtr_proxy']
 sim_data['UHI_index'] = model.predict(sim_scaled[model_features]).round(3)
 
+# Set visualization range
+vmin, vmax = 0, 5
+sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
+
+# Define the color bins and color scale - CONSISTENT COLOR DEFINITION
+bins = [0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 5]  # 8 equal bins between 0 and 5
+colors = ['#ffffff', '#ffffd9', '#fff5b8', '#ffde82', '#ffc04d', '#ff9a2e', '#ff6b39', '#cc0000']
+
+# Create color mapping function for consistent coloring
+def get_color(value):
+    for i, b in enumerate(bins[1:]):
+        if value < b:
+            return colors[i]
+    return colors[-1]
+
+# Create custom colormap for the choropleth
+colormap = cm.LinearColormap(
+    colors=colors,
+    vmin=vmin,
+    vmax=vmax,
+    caption="UHI Intensity (°C)"
+)
+
+# Create two columns for map and table with more space between them
 col1, col2 = st.columns(2)
 
-# CREATE MAP
 with col1:
+    # Create UHI map
     bounds = sim_data.total_bounds
     buffer = 0.05
     map = leafmap.Map(
         location=[8.48, 124.65],
-        tiles="CartoDB.PositronNoLabels",
-        zoom_start=11,
-        min_zoom=11,
+        zoom_start=10,  # Adjusted zoom for smaller map
+        min_zoom=10,
         max_zoom=18,
+        tiles="CartoDB.PositronNoLabels",
         max_bounds=True,
         min_lat=bounds[1]-buffer,
         max_lat=bounds[3]+buffer,
         min_lon=bounds[0]-buffer,
         max_lon=bounds[2]+buffer,
+        control_scale=False,
         search_control=False,
-    )
-
-    # Set visualization range
-    vmin, vmax = 0, 5
-    sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
-    
-    # Define the color bins and color scale - CONSISTENT COLOR DEFINITION
-    bins = [0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 5]  # 8 equal bins between 0 and 5
-    colors = ['#ffffff', '#ffffd9', '#fff5b8', '#ffde82', '#ffc04d', '#ff9a2e', '#ff6b39', '#cc0000']
-    
-    # Create color mapping function for consistent coloring
-    def get_color(value):
-        for i, b in enumerate(bins[1:]):
-            if value < b:
-                return colors[i]
-        return colors[-1]
-    
-    # Create custom colormap for the choropleth
-    colormap = cm.LinearColormap(
-        colors=colors,
-        vmin=vmin,
-        vmax=vmax,
-        caption="UHI Intensity (°C)"
+        layer_control=False,
+        height="400px"  # Reduced height
     )
 
     # Define style function for GeoJson to ensure colors match our scale
@@ -231,26 +235,15 @@ with col1:
 
     # Add the color legend
     colormap.add_to(map)
-    
-    # ADD CHOROPLETH LAYER
-    folium.Choropleth(
-        geo_data=sim_data.__geo_interface__,
-        data=sim_data,
-        columns=["barangay", "UHI_vis"],
-        key_on="feature.properties.barangay",
-        fill_color="YlOrRd",
-        fill_opacity=0.5,
-        line_opacity=0,
-        legend_name="UHI Intensity (°C)",
-        bins=[0, 1, 2, 3, 4, 5],
-        name="UHI Intensity",
-        control=False
-    ).add_to(map)
-    
-    # DISPLAY MAP
-    map.to_streamlit(width=None, height=800, add_layer_control=False)
 
-with col2:    
+    # Display map
+    st.subheader("UHI Distribution Map")
+    map.to_streamlit(use_container_width=True)
+
+with col2:
+    # Add a table showing all barangays with scrolling capability
+    st.subheader("Barangays by UHI Intensity")
+    
     # Get all barangays sorted by UHI index
     all_barangays = sim_data[['barangay', 'UHI_index']].sort_values(by='UHI_index', ascending=False).reset_index(drop=True)
     
