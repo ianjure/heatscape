@@ -92,7 +92,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust built-up index intensity as a multiplier of current value"
+            help="Adjust built-up index intensity."
         )
         nlights_mult = st.slider(
             "Artificial Lighting multiplier",
@@ -100,7 +100,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust nighttime light intensity as a multiplier of current value"
+            help="Adjust nighttime light intensity."
         )
     
     with st.expander("🌬️ Atmospheric Conditions", expanded=True):
@@ -110,7 +110,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust vertical atmospheric motion as a multiplier of current value"
+            help="Adjust vertical atmospheric motion."
         )
     
     with st.expander("🌿 Cooling & Environment", expanded=True):
@@ -120,7 +120,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust cooling capacity of green spaces and surfaces as a multiplier of current value"
+            help="Adjust cooling capacity of green spaces and surfaces."
         )
         canyon_mult = st.slider(
             "Urban Canyon Effect multiplier",
@@ -128,7 +128,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust building canyon trapping effect as a multiplier of current value"
+            help="Adjust building canyon trapping effect."
         )
         micro_mult = st.slider(
             "Microclimate Modifier multiplier",
@@ -136,7 +136,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust local modifiers like shade or humidity as a multiplier of current value"
+            help="Adjust local modifiers like shade or humidity."
         )
         dtr_mult = st.slider(
             "Day-Night Temp Range (DTR) multiplier",
@@ -144,7 +144,7 @@ with st.sidebar:
             max_value=multiplier_max,
             value=multiplier_default,
             step=multiplier_step,
-            help="Adjust the range between daytime and nighttime temperatures as a multiplier of current value"
+            help="Adjust the range between daytime and nighttime temperatures."
         )
 
 # APPLY MULTIPLIERS TO FEATURE VALUES
