@@ -116,7 +116,7 @@ with st.sidebar:
             help="Adjust nighttime light intensity."
         )
     
-    with st.expander("🌬️ Atmospheric Conditions", expanded=True):
+    with st.expander("🌬️ Atmospheric Conditions", expanded=False):
         omega_mult = st.slider(
             "Vertical Air Motion (ω500) multiplier",
             min_value=multiplier_min,
@@ -126,7 +126,7 @@ with st.sidebar:
             help="Adjust vertical atmospheric motion."
         )
     
-    with st.expander("🌿 Cooling & Environment", expanded=True):
+    with st.expander("🌿 Cooling & Environment", expanded=False):
         cooling_mult = st.slider(
             "Cooling Potential multiplier",
             min_value=multiplier_min,
