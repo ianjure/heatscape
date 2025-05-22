@@ -236,13 +236,10 @@ with col1:
     colormap.add_to(map)
 
     # Display map
-    st.subheader("UHI Distribution Map")
+    st.subheader("🗺️ UHI Distribution Map")
     map.to_streamlit(height=600, width=None, add_layer_control=False)
 
 with col2:
-    # Add a table showing all barangays with scrolling capability
-    st.subheader("Barangays by UHI Intensity")
-    
     # Get all barangays sorted by UHI index
     all_barangays = sim_data[['barangay', 'UHI_index']].sort_values(by='UHI_index', ascending=False).reset_index(drop=True)
     
@@ -275,6 +272,7 @@ with col2:
     )
     
     # Display the table with fixed height and scrolling
+    st.subheader("📍Barangays by UHI Intensity")
     st.dataframe(
         styled_table,
         height=400,  # Match map height
@@ -289,6 +287,6 @@ with col2:
     st.markdown("### 🔍 Summary Metrics")
     m1, m2, m3 = st.columns(3)
 
-    m1.metric("Average UHI Index", f"{avg_uhi.round(3)} °C", border=False)
-    m2.metric("Hottest Barangay", hottest_barangay['barangay'], f"{hottest_barangay['UHI_index']:.3f} °C", border=False)
-    m3.metric("Coolest Barangay", coolest_barangay['barangay'], f"{coolest_barangay['UHI_index']:.3f} °C", border=False)
+    m1.metric("Average UHI Index", f"{avg_uhi:.3f} °C", border=True)
+    m2.metric("Hottest Barangay", hottest_barangay['barangay'], f"{hottest_barangay['UHI_index']:.3f} °C", border=True)
+    m3.metric("Coolest Barangay", coolest_barangay['barangay'], f"{coolest_barangay['UHI_index']:.3f} °C", border=True)
