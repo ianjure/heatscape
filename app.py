@@ -75,6 +75,7 @@ model = load_model()
 
 # MERGE FEATURES WITH GEOMETRIES
 sim_data = cdo_gdf.merge(features_df, on='barangay')
+sim_data['barangay'] = sim_data['barangay'].str.replace(r'\bBarangay\b', 'Brgy', regex=True)
 
 # MULTIPLIER SLIDER PARAMETERS
 # Range from 0.5x (half current) to 1.5x (50% increase)
@@ -218,36 +219,6 @@ with col1:
             'weight': 1.0,
             'opacity': 0.9
         }
-
-    st.subheader("📍Select a Barangay to Highlight on the Map")
-    selected_barangay = st.selectbox(
-        "Choose a Barangay",
-        options=sim_data['barangay'],
-        index=0
-    )
-
-    # If a barangay is selected, zoom in and add a highlight
-    highlight_feature = sim_data[sim_data['barangay'] == selected_barangay]
-    
-    if not highlight_feature.empty:
-        centroid = highlight_feature.geometry.centroid.values[0]
-        map.set_center(centroid.y, centroid.x, zoom=14)
-    
-        folium.GeoJson(
-            highlight_feature,
-            style_function=lambda x: {
-                'fillColor': 'none',
-                'color': 'blue',
-                'weight': 4,
-                'dashArray': '5, 5'
-            },
-            tooltip=folium.GeoJsonTooltip(
-                fields=["barangay", "UHI_index"],
-                aliases=["Barangay:", "UHI Intensity (°C):"],
-                style=("font-weight: bold; font-size: 12px;"),
-                sticky=True
-            )
-        ).add_to(map)
 
     # Add GeoJson layer with our custom style function
     folium.GeoJson(
