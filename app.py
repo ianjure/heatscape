@@ -122,6 +122,7 @@ with st.sidebar:
 # PREDICTION FUNCTION
 def predict_UHI(data):
     X_adj = data.copy()
+    X_adj = X_adj.drop(columns=['barangay'])
     for feat in sliders:
         X_adj[feat] = sliders[feat]
     return model.predict(X_adj)
