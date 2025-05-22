@@ -256,7 +256,8 @@ with col2:
     
     # Format the UHI values to 3 decimal places but keep numeric version for styling
     display_df = all_barangays.copy()
-    display_df['UHI_index'] = display_df['UHI_index'].map(lambda x: f"{x:.3f}")  # Format for display
+    display_df['UHI_index'] = display_df['UHI_index'].map(lambda x: f"{x:.3f}")
+    display_df = display_df.rename(columns={"barangay":"Barangay", "UHI_index":"UHI Index"})
     
     # Define a function to style each cell based on UHI value
     def color_uhi_values(val):
@@ -279,7 +280,7 @@ with col2:
     # Apply styling to the UHI_index column only
     styled_table = display_df.style.applymap(
         color_uhi_values, 
-        subset=['UHI_index']
+        subset=['UHI Index']
     )
     
     # Display the table with fixed height and scrolling
