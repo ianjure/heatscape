@@ -218,6 +218,9 @@ sim_data['UHI_index'] = model.predict(sim_scaled[model_features]).round(3)
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
+# FORMAT UHI INDEX
+sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
+
 # DASHBOARD SECTIONS
 col1, col2 = st.columns(2)
 
