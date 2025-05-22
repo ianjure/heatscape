@@ -206,7 +206,6 @@ with col1:
         control_scale=False,
         search_control=False,
         layer_control=False,
-        height="400px"  # Reduced height
     )
 
     # Define style function for GeoJson to ensure colors match our scale
@@ -238,7 +237,7 @@ with col1:
 
     # Display map
     st.subheader("UHI Distribution Map")
-    map.to_streamlit(use_container_width=True)
+    map.to_streamlit(height=600, width=None, add_layer_control=False)
 
 with col2:
     # Add a table showing all barangays with scrolling capability
