@@ -6,9 +6,8 @@ import streamlit as st
 import leafmap.foliumap as leafmap
 
 import joblib
-from sklearn.pipeline import Pipeline
 
-# Configure page layout
+# CONFIGURE PAGE LAYOUT
 st.set_page_config(layout="wide")
 st.logo(image="logo.png", size="large")
 
@@ -49,16 +48,6 @@ padding = """
     """
 st.markdown(padding, unsafe_allow_html=True)
 
-# [LEAFMAP] REMOVE LAYER CONTROL
-hide_layer_control = """
-<style>
-iframe .leaflet-control-layers {
-    display: none !important;
-}
-</style>
-"""
-st.markdown(hide_layer_control, unsafe_allow_html=True)
-
 # [LEAFMAP] ADD MAP BORDER
 map_border_style = """
 <style>
@@ -70,7 +59,7 @@ iframe {
 """
 st.markdown(map_border_style, unsafe_allow_html=True)
 
-# Load functions (cached for performance)
+# LOAD FUNCTIONS (CACHED FOR PERFORMANCE)
 @st.cache_resource
 def load_data():
     cdo = gpd.read_parquet("cdo_geodata.parquet")
@@ -79,78 +68,69 @@ def load_data():
 
 @st.cache_resource 
 def load_model():
-    return joblib.load("pipeline.joblib")
+    return joblib.load("model.joblib")
 
-# Load all data
+# LOAD ALL DATA
 cdo_gdf, features_df = load_data()
-pipeline = load_model()
+model = load_model()
 
-# Merge features with geometries
+# MERGE FEATURES WITH GEOMETRIES
 sim_data = cdo_gdf.merge(features_df, on='barangay')
 
-# Simulation controls
+# --- Sidebar controls with simplified names and tooltips ---
+feature_info = {
+    "NDBI": ("Urban Density", "Normalized Difference Built-up Index – higher values mean more urban surfaces."),
+    "nighttime_lights": ("Nighttime Lights", "Brightness at night – proxy for human activity and infrastructure."),
+    "omega_500": ("Air Motion (500 hPa)", "Vertical air motion – influences heat dispersion and cloud formation."),
+    "cooling_capacity": ("Cooling Capacity", "Natural ability of area to cool itself – higher magnitude means more cooling."),
+    "canyon_effect": ("Urban Canyon Effect", "Buildings trap heat – higher values mean stronger canyon effect."),
+    "microclimate_mod": ("Microclimate Modifier", "Land cover's impact on local temperature, humidity, and wind."),
+    "dtr_proxy": ("Diurnal Temp Range", "Temperature fluctuation between day and night – proxy for heat retention.")
+}
+
+levels = ["Very Low", "Low", "Medium", "High", "Very High"]
+info_df = pd.read_csv("info.csv", index_col=0)
+
+def map_levels_to_values(feature):
+    min_val = info_df.loc["min", feature]
+    max_val = info_df.loc["max", feature]
+    return {
+        "Very Low": min_val,
+        "Low": min_val + 0.25 * (max_val - min_val),
+        "Medium": min_val + 0.5 * (max_val - min_val),
+        "High": min_val + 0.75 * (max_val - min_val),
+        "Very High": max_val
+    }
+
 with st.sidebar:
     st.title("Simulation Controls")
-    
-    with st.expander("🌱 Vegetation Indices"):
-        ndvi_adj = st.slider("NDVI Multiplier", 0.5, 1.5, 1.0, 0.01)
-        ndwi_adj = st.slider("NDWI Multiplier", 0.5, 1.5, 1.0, 0.01)
-        
-    with st.expander("🏗️ Urban Features"):
-        ndbi_adj = st.slider("NDBI Multiplier", 0.5, 1.5, 1.0, 0.01)
-        built_up_adj = st.slider("Built-up Area Multiplier", 0.5, 1.5, 1.0, 0.01)
-        
-    with st.expander("🌡️ Temperature"):
-        skin_temp_adj = st.slider("Skin Temp (°C)", -5.0, 5.0, 0.0, 0.1)
-        temp_2m_adj = st.slider("2m Air Temp (°C)", -5.0, 5.0, 0.0, 0.1)
-        
-    with st.expander("💧 Humidity"):
-        humidity_adj = st.slider("Humidity (%)", -10.0, 10.0, 0.0, 0.1)
-        temp_dew_adj = st.slider("Dew Point (°C)", -3.0, 3.0, 0.0, 0.1)
-        
-    with st.expander("🌤️ Radiation"):
-        albedo_adj = st.slider("Albedo", 0.8, 1.2, 1.0, 0.01)
-        incoming_sw_adj = st.slider("Solar Radiation (W/m²)", -50.0, 50.0, 0.0, 1.0)
-        
+    st.markdown("Adjust each feature to simulate changes in the Urban Heat Island index.")
+    sliders = {}
+
+    for feature, (label, tooltip) in feature_info.items():
+        value_map = map_levels_to_values(feature)
+        selected_level = st.select_slider(
+            label=label,
+            options=levels,
+            value="Medium",
+            help=tooltip
+        )
+        sliders[feature] = value_map[selected_level]
+
     scenario = st.selectbox("Climate Scenario", ["Current", "RCP 4.5", "RCP 8.5"])
 
-# Prediction function
+# PREDICTION FUNCTION
 def predict_UHI(data):
-    # Create adjusted feature matrix
-    X_adj = pd.DataFrame({
-        'NDBI': data['NDBI'] * ndbi_adj,
-        'NDVI': data['NDVI'] * ndvi_adj,
-        'NDWI': data['NDWI'] * ndwi_adj,
-        'NO2': data['NO2'],  # No adjustment
-        'albedo': data['albedo'] * albedo_adj,
-        'aspect': data['aspect'],
-        'built_up': data['built_up'] * built_up_adj,
-        'elevation': data['elevation'],
-        'geopot_500': data['geopot_500'],
-        'humidity': data['humidity'] + humidity_adj,
-        'incoming_sw': data['incoming_sw'] + incoming_sw_adj,
-        'lcl_height': data['lcl_height'],
-        'net_radiation': data['net_radiation'],
-        'omega_500': data['omega_500'],
-        'pbl_height': data['pbl_height'],
-        'precipitable_water': data['precipitable_water'],
-        'radiation_ratio': data['radiation_ratio'],
-        'skin_temp': data['skin_temp'] + skin_temp_adj,
-        'slope': data['slope'],
-        'surface_pressure': data['surface_pressure'],
-        'temp_2m': data['temp_2m'] + temp_2m_adj,
-        'temp_850': data['temp_850'],
-        'temp_dew': data['temp_dew'] + temp_dew_adj,
-        'temp_wet': data['temp_wet']
-    })
-    # Scale and predict
-    return pipeline.predict(X_adj)
+    X_adj = data.copy()
+    for feat in sliders:
+        X_adj[feat] = sliders[feat]
+    return model.predict(X_adj)
 
-# Apply predictions
+# APPLY PREDICTIONS
 sim_data['UHI_index'] = predict_UHI(sim_data)
 sim_data['UHI_index'] = sim_data['UHI_index'].round(3)
 
-# Create UHI map
+# CREATE MAP
 bounds = sim_data.total_bounds
 buffer = 0.05
 map = leafmap.Map(
@@ -167,13 +147,13 @@ map = leafmap.Map(
     search_control=False,
 )
 
-# Set visualization range
+# SET VISUALIZATION RANGE
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
-# Add choropleth layer
+# ADD CHOROPLETH LAYER
 folium.Choropleth(
-    geo_data=sim_data.__geo_interface__,  # Convert to GeoJSON dict
+    geo_data=sim_data.__geo_interface__,
     data=sim_data,
     columns=["barangay", "UHI_vis"],
     key_on="feature.properties.barangay",
@@ -186,7 +166,7 @@ folium.Choropleth(
     control=False
 ).add_to(map)
 
-# Add tooltips
+# ADD TOOLTIPS
 folium.GeoJson(
     data=sim_data,
     style_function=lambda x: {'color': 'black', 'weight': 0.5, 'fillOpacity': 0},
@@ -200,5 +180,5 @@ folium.GeoJson(
     control=False
 ).add_to(map)
 
-# Full-page map display
+# DISPLAY MAP
 map.to_streamlit(use_container_width=True)
