@@ -63,6 +63,7 @@ metric_value = """
 <style>
 div[data-testid="stMetricValue"] {
     font-size: 1.6rem;
+    font-weight: 800;
 }
 </style>
 """
@@ -248,7 +249,7 @@ with col1:
 
     # Display map
     st.subheader("🗺️ UHI Distribution Map")
-    map.to_streamlit(height=585, width=None, add_layer_control=False)
+    map.to_streamlit(height=580, width=None, add_layer_control=False)
 
 with col2:
     # Get all barangays sorted by UHI index
