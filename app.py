@@ -80,37 +80,37 @@ with st.sidebar:
     st.title("🧪 Simulate UHI Factors")
 
     with st.expander("🏙️ Urban Surface Features"):
-        ndbi = st.slider("Built Environment (NDBI)", -0.64, 0.13, 0.0, 0.01,
-                         help="Normalized Difference Built-up Index: Higher = more built-up area")
-        night_lights = st.slider("Artificial Lighting", 0.0, 51.86, 10.0, 0.1,
-                                 help="Nighttime light intensity: proxy for urban activity")
+        ndbi_multiplier = st.slider("Built Environment (NDBI)", 0.5, 1.5, 1.0, 0.01,
+                                    help="Scales the built-up index of each barangay")
+        night_lights_multiplier = st.slider("Artificial Lighting", 0.5, 1.5, 1.0, 0.01,
+                                           help="Scales nighttime light intensity")
 
     with st.expander("🌬️ Atmospheric Conditions"):
-        omega_500 = st.slider("Vertical Air Motion (ω500)", -0.33, 0.05, -0.1, 0.01,
-                              help="Vertical pressure velocity at 500 hPa: indicates rising/sinking air")
+        omega_500_multiplier = st.slider("Vertical Air Motion (ω500)", 0.5, 1.5, 1.0, 0.01,
+                                        help="Scales vertical motion values at 500hPa")
 
     with st.expander("🌿 Cooling & Environment"):
-        cooling_capacity = st.slider("Cooling Potential", -26629.1, -1.23, -10000.0, 10.0,
-                                     help="Net energy available for cooling (higher is better)")
-        canyon_effect = st.slider("Urban Canyon Effect", 0.54, 76162.57, 5000.0, 100.0,
-                                  help="Influence of building geometry on heat trapping")
-        microclimate_mod = st.slider("Microclimate Modifier", -56.09, 1.96, 0.0, 0.1,
-                                     help="Factor accounting for small-scale temperature variance")
-        dtr_proxy = st.slider("Day-Night Temp Range (DTR)", 0.06, 1.27, 0.8, 0.01,
-                              help="Proxy for diurnal temperature range")
+        cooling_capacity_multiplier = st.slider("Cooling Potential", 0.5, 1.5, 1.0, 0.01,
+                                               help="Scales the potential cooling capacity")
+        canyon_effect_multiplier = st.slider("Urban Canyon Effect", 0.5, 1.5, 1.0, 0.01,
+                                            help="Scales building structure and canyon effects")
+        microclimate_mod_multiplier = st.slider("Microclimate Modifier", 0.5, 1.5, 1.0, 0.01,
+                                               help="Scales the modifier for local microclimates")
+        dtr_proxy_multiplier = st.slider("Day-Night Temp Range (DTR)", 0.5, 1.5, 1.0, 0.01,
+                                        help="Scales the range between day and night temps")
         
 # PREDICTION FUNCTION
 def predict_UHI(data):
     X_adj = pd.DataFrame({
-        'NDBI': data['NDBI'] * (ndbi / 0.0 if 0.0 != 0 else 1),  # avoid div by 0
-        'nighttime_lights': data['nighttime_lights'] * (night_lights / 10.0),
-        'omega_500': data['omega_500'] * (omega_500 / -0.1 if -0.1 != 0 else 1),
-        'cooling_capacity': data['cooling_capacity'] * (cooling_capacity / -10000.0),
-        'canyon_effect': data['canyon_effect'] * (canyon_effect / 5000.0),
-        'microclimate_mod': data['microclimate_mod'] * (microclimate_mod / 0.0 if 0.0 != 0 else 1),
-        'dtr_proxy': data['dtr_proxy'] * (dtr_proxy / 0.8),
+        'NDBI': data['NDBI'] * ndbi_multiplier,
+        'nighttime_lights': data['nighttime_lights'] * night_lights_multiplier,
+        'omega_500': data['omega_500'] * omega_500_multiplier,
+        'cooling_capacity': data['cooling_capacity'] * cooling_capacity_multiplier,
+        'canyon_effect': data['canyon_effect'] * canyon_effect_multiplier,
+        'microclimate_mod': data['microclimate_mod'] * microclimate_mod_multiplier,
+        'dtr_proxy': data['dtr_proxy'] * dtr_proxy_multiplier,
     })
-    return model.predict(X_adj)
+    return pipeline.predict(X_adj)
 
 # APPLY PREDICTIONS
 sim_data['UHI_index'] = predict_UHI(sim_data)
