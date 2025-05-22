@@ -4,6 +4,7 @@ import geopandas as gpd
 import joblib
 import folium
 import leafmap.foliumap as leafmap
+import branca.colormap as cm
 
 # CONFIGURE PAGE LAYOUT
 st.set_page_config(layout="wide")
