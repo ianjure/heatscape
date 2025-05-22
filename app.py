@@ -222,7 +222,7 @@ with col1:
     st.subheader("📍Select a Barangay to Highlight on the Map")
     selected_barangay = st.selectbox(
         "Choose a Barangay",
-        options=sim_df['barangay'],
+        options=sim_data['barangay'],
         index=0
     )
 
