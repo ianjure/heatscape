@@ -195,7 +195,7 @@ with col1:
     buffer = 0.05
     map = leafmap.Map(
         location=[8.48, 124.65],
-        zoom_start=10,  # Adjusted zoom for smaller map
+        zoom_start=11,  # Adjusted zoom for smaller map
         min_zoom=10,
         max_zoom=18,
         tiles="CartoDB.PositronNoLabels",
@@ -238,7 +238,7 @@ with col1:
 
     # Display map
     st.subheader("🗺️ UHI Distribution Map")
-    map.to_streamlit(height=595, width=None, add_layer_control=False)
+    map.to_streamlit(height=580, width=None, add_layer_control=False)
 
 with col2:
     # Get all barangays sorted by UHI index
