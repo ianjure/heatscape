@@ -74,14 +74,15 @@ st.markdown(metric_value, unsafe_allow_html=True)
 def load_data():
     cdo = gpd.read_parquet("cdo_geodata.parquet")
     features = pd.read_csv("latest_data.csv")
-    return cdo.to_crs(epsg=4326), features
+    info = pd.read_csv("info.csv", index_col=0)
+    return cdo.to_crs(epsg=4326), features, info
 
 @st.cache_resource 
 def load_model():
     return joblib.load("model.joblib")
 
 # LOAD ALL DATA
-cdo_gdf, features_df = load_data()
+cdo_gdf, features_df, info_df = load_data()
 model = load_model()
 
 # MERGE FEATURES WITH GEOMETRIES
@@ -161,13 +162,13 @@ with st.sidebar:
 
 # APPLY MULTIPLIERS TO FEATURE VALUES
 sim_scaled = sim_data.copy()
-ndbi_min, ndbi_max = -0.639, 0.134
-nlights_min, nlights_max = 0.0, 51.856
-omega_min, omega_max = -0.332, 0.054
-cooling_min, cooling_max = -26629.1, -1.226
-canyon_min, canyon_max = 0.540, 76162.57
-micro_min, micro_max = -56.091, 1.958
-dtr_min, dtr_max = 0.060, 1.265
+ndbi_min, ndbi_max = info_df.loc['min', 'NDBI'], info_df.loc['max', 'NDBI']
+nlights_min, nlights_max = info_df.loc['min', 'nighttime_lights'], info_df.loc['max', 'nighttime_lights']
+omega_min, omega_max = info_df.loc['min', 'omega_500'], info_df.loc['max', 'omega_500']
+cooling_min, cooling_max = info_df.loc['min', 'cooling_capacity'], info_df.loc['max', 'cooling_capacity']
+canyon_min, canyon_max = info_df.loc['min', 'canyon_effect'], info_df.loc['max', 'canyon_effect']
+micro_min, micro_max = info_df.loc['min', 'microclimate_mod'], info_df.loc['max', 'microclimate_mod']
+dtr_min, dtr_max = info_df.loc['min', 'dtr_proxy'], info_df.loc['max', 'dtr_proxy']
 
 sim_scaled['NDBI_norm'] = (sim_scaled['NDBI'] - ndbi_min) / (ndbi_max - ndbi_min)
 sim_scaled['NDBI_norm'] *= ndbi_mult
@@ -203,39 +204,20 @@ model_features = ['NDBI', 'nighttime_lights', 'omega_500',
                   'microclimate_mod', 'dtr_proxy']
 sim_data['UHI_index'] = model.predict(sim_scaled[model_features]).round(3)
 
-# Set visualization range
+# SET VISUALIZATION RANGE
 vmin, vmax = 0, 5
 sim_data['UHI_vis'] = sim_data['UHI_index'].clip(vmin, vmax)
 
-# Define the color bins and color scale - CONSISTENT COLOR DEFINITION
-bins = [0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 5]  # 8 equal bins between 0 and 5
-colors = ['#ffffff', '#ffffd9', '#fff5b8', '#ffde82', '#ffc04d', '#ff9a2e', '#ff6b39', '#cc0000']
-
-# Create color mapping function for consistent coloring
-def get_color(value):
-    for i, b in enumerate(bins[1:]):
-        if value < b:
-            return colors[i]
-    return colors[-1]
-
-# Create custom colormap for the choropleth
-colormap = cm.LinearColormap(
-    colors=colors,
-    vmin=vmin,
-    vmax=vmax,
-    caption="UHI Intensity (°C)"
-)
-
-# Create two columns for map and table with more space between them
+# DASHBOARD SECTIONS
 col1, col2 = st.columns(2)
 
+# MAP SECTION
 with col1:
-    # Create UHI map
     bounds = sim_data.total_bounds
     buffer = 0.05
     map = leafmap.Map(
         location=[8.48, 124.65],
-        zoom_start=10,  # Adjusted zoom for smaller map
+        zoom_start=10,
         min_zoom=10,
         max_zoom=18,
         tiles="CartoDB.PositronNoLabels",
@@ -249,7 +231,26 @@ with col1:
         layer_control=False,
     )
 
-    # Define style function for GeoJson to ensure colors match our scale
+    # CONSISTENT COLOR DEFINITION
+    bins = [0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 5]
+    colors = ['#ffffff', '#ffffd9', '#fff5b8', '#ffde82', '#ffc04d', '#ff9a2e', '#ff6b39', '#cc0000']
+    
+    # FUNCTION TO CREATE COLOR MAPPING
+    def get_color(value):
+        for i, b in enumerate(bins[1:]):
+            if value < b:
+                return colors[i]
+        return colors[-1]
+    
+    # CREATE CUSTOM COLORMAP FOR THE CHOROPLETH
+    colormap = cm.LinearColormap(
+        colors=colors,
+        vmin=vmin,
+        vmax=vmax,
+        caption="UHI Intensity (°C)"
+    )
+
+    # STYLE FUNCTION FOR GEOJSON
     def style_function(feature):
         value = feature['properties']['UHI_vis']
         return {
@@ -260,7 +261,7 @@ with col1:
             'opacity': 0.9
         }
 
-    # Add GeoJson layer with our custom style function
+    # ADD GEOJSON LAYER
     folium.GeoJson(
         data=sim_data,
         style_function=style_function,
@@ -273,61 +274,49 @@ with col1:
         name="UHI Intensity",
     ).add_to(map)
 
-    # Add the color legend
+    # ADD THE COLOR LEGEND
     colormap.add_to(map)
 
-    # Display map
+    # DISPLAY MAP
     st.subheader("🗺️ UHI Distribution Map")
     map.to_streamlit(height=580, width=None, add_layer_control=False)
 
+# TABLE AND METRIC SECTION
 with col2:
-    # Get all barangays sorted by UHI index
     all_barangays = sim_data[['barangay', 'UHI_index']].sort_values(by='UHI_index', ascending=False).reset_index(drop=True)
-    
-    # Format the UHI values to 3 decimal places but keep numeric version for styling
+
+    # FORMAT THE DATAFRAME
     display_df = all_barangays.copy()
     display_df['UHI_index'] = display_df['UHI_index'].map(lambda x: f"{x:.3f}")
     display_df = display_df.rename(columns={"barangay":"Barangay", "UHI_index":"UHI Index"})
     
-    # Define a function to style each cell based on UHI value
+    # FUNCTION TO STYLE EACH CELL BASED ON UHI VALUE
     def color_uhi_values(val):
         if not isinstance(val, str):
             return ''
-        
         try:
             val_float = float(val)
-            # Use our same color function to ensure consistent coloring
             color = get_color(val_float)
-            
-            # Return the styling for the cell - use white text for darker backgrounds
             dark_colors = ['#ff6b39', '#cc0000']
             text_color = "white" if color in dark_colors else "black"
-            
             return f'background-color: {color}; color: {text_color}; font-weight: bold'
         except:
             return ''
     
-    # Apply styling to the UHI_index column only
-    styled_table = display_df.style.applymap(
-        color_uhi_values, 
-        subset=['UHI Index']
-    )
+    # APPLY STYLING TO UHI INDEX COLUMN
+    styled_table = display_df.style.applymap(color_uhi_values, subset=['UHI Index'])
     
-    # Display the table with fixed height and scrolling
+    # DISPLAY THE TABLE
     st.subheader("📍Barangays by UHI Intensity")
-    st.dataframe(
-        styled_table,
-        height=400,  # Match map height
-        use_container_width=True
-    )
+    st.dataframe(styled_table, height=400, use_container_width=True)
 
-    # Add summary metrics using st.metric
+    # CALCULATE SUMMARY METRICS
     avg_uhi = sim_data['UHI_index'].mean().round(3)
     hottest_barangay = sim_data.loc[sim_data['UHI_index'].idxmax()]
     coolest_barangay = sim_data.loc[sim_data['UHI_index'].idxmin()]
 
-    st.markdown("### 🔍 Summary Metrics")
-    
+    # DISPLAY THE METRICS
+    st.subheader("🔍 Summary Metrics")
     m1, m2, m3 = st.columns(3)
     m1.metric("Average UHI Index", f"{avg_uhi:.3f} °C", border=True)
     m2.metric(f"Hottest Barangay ({hottest_barangay['UHI_index']:.3f} °C)", hottest_barangay['barangay'], border=True)
