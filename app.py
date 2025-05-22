@@ -61,7 +61,7 @@ st.markdown(map_border_style, unsafe_allow_html=True)
 # [STREAMLIT] METRIC VALUE SIZE
 metric_value = """
 <style>
-[data-testid="stMetricValue"] {
+div[data-testid="stMetricValue"] {
     font-size: 1.5rem;
 }
 </style>
