@@ -195,7 +195,7 @@ with col1:
     buffer = 0.05
     map = leafmap.Map(
         location=[8.48, 124.65],
-        zoom_start=11,  # Adjusted zoom for smaller map
+        zoom_start=10,  # Adjusted zoom for smaller map
         min_zoom=10,
         max_zoom=18,
         tiles="CartoDB.PositronNoLabels",
@@ -238,7 +238,7 @@ with col1:
 
     # Display map
     st.subheader("🗺️ UHI Distribution Map")
-    map.to_streamlit(height=580, width=None, add_layer_control=False)
+    map.to_streamlit(height=590, width=None, add_layer_control=False)
 
 with col2:
     # Get all barangays sorted by UHI index
@@ -286,8 +286,23 @@ with col2:
     coolest_barangay = sim_data.loc[sim_data['UHI_index'].idxmin()]
 
     st.markdown("### 🔍 Summary Metrics")
-    m1, m2, m3 = st.columns(3)
 
-    m1.metric("Average UHI Index", f"{avg_uhi:.3f} °C", border=True)
-    m2.metric(f"Hottest Barangay ({hottest_barangay['UHI_index']:.3f} °C)", hottest_barangay['barangay'], border=True)
-    m3.metric(f"Coolest Barangay ({coolest_barangay['UHI_index']:.3f} °C)", coolest_barangay['barangay'], border=True)
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        with st.container(border=True):
+            st.metric("Average UHI Index", f"{avg_uhi:.3f} °C")
+
+    with col2:
+        with st.container(border=True):
+            st.metric(
+                f"Hottest Barangay ({hottest_barangay['UHI_index']:.3f} °C)",
+                hottest_barangay['barangay']
+            )
+
+    with col3:
+        with st.container(border=True):
+            st.metric(
+                f"Coolest Barangay ({coolest_barangay['UHI_index']:.3f} °C)",
+                coolest_barangay['barangay']
+            )
