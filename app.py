@@ -295,6 +295,7 @@ with col2:
                 <div style="text-align: center;">
                     <strong>Average UHI Index</strong><br>
                     <span style="font-size: 2rem;">{avg_uhi:.3f} °C</span>
+                    <span style="font-size: 0.4em;"></span>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -304,7 +305,7 @@ with col2:
                 <div style="text-align: center;">
                     <strong>Hottest Barangay</strong><br>
                     <span style="font-size: 1.5em;">{hottest_barangay['barangay']}</span><br>
-                    <span style="font-size: 0.5em;">{hottest_barangay['UHI_index']:.3f} °C</span>
+                    <span style="font-size: 0.9em;">{hottest_barangay['UHI_index']:.3f} °C</span>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -314,6 +315,6 @@ with col2:
                 <div style="text-align: center;">
                     <strong>Coolest Barangay</strong><br>
                     <span style="font-size: 1.5em;">{coolest_barangay['barangay']}</span><br>
-                    <span style="font-size: 0.5em;">{coolest_barangay['UHI_index']:.3f} °C</span>
+                    <span style="font-size: 0.9em;">{coolest_barangay['UHI_index']:.3f} °C</span>
                 </div>
             """, unsafe_allow_html=True)
