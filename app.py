@@ -101,16 +101,16 @@ with st.sidebar:
         
 # PREDICTION FUNCTION
 def predict_UHI(data):
-    adjusted_df = pd.DataFrame({
-        'NDBI': [ndbi] * len(data),
-        'nighttime_lights': [night_lights] * len(data),
-        'omega_500': [omega_500] * len(data),
-        'cooling_capacity': [cooling_capacity] * len(data),
-        'canyon_effect': [canyon_effect] * len(data),
-        'microclimate_mod': [microclimate_mod] * len(data),
-        'dtr_proxy': [dtr_proxy] * len(data),
+    X_adj = pd.DataFrame({
+        'NDBI': data['NDBI'] * (ndbi / 0.0 if 0.0 != 0 else 1),  # avoid div by 0
+        'nighttime_lights': data['nighttime_lights'] * (night_lights / 10.0),
+        'omega_500': data['omega_500'] * (omega_500 / -0.1 if -0.1 != 0 else 1),
+        'cooling_capacity': data['cooling_capacity'] * (cooling_capacity / -10000.0),
+        'canyon_effect': data['canyon_effect'] * (canyon_effect / 5000.0),
+        'microclimate_mod': data['microclimate_mod'] * (microclimate_mod / 0.0 if 0.0 != 0 else 1),
+        'dtr_proxy': data['dtr_proxy'] * (dtr_proxy / 0.8),
     })
-    return model.predict(adjusted_df)
+    return pipeline.predict(X_adj)
 
 # APPLY PREDICTIONS
 sim_data['UHI_index'] = predict_UHI(sim_data)
