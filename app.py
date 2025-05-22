@@ -168,8 +168,9 @@ with st.sidebar:
 
 # APPLY MULTIPLIERS TO FEATURE VALUES
 sim_scaled = sim_data.copy()
-sim_scaled['NDBI'] *= ndbi_mult
-sim_scaled['NDBI'] = sim_scaled['NDBI'].clip(-1, 1)
+ndbi_min, ndbi_max = -0.639, 0.134
+sim_scaled['NDBI_norm'] = (sim_scaled['NDBI'] - ndbi_min) / (ndbi_max - ndbi_min)
+sim_scaled['NDBI_norm'] *= ndbi_mult
 sim_scaled['nighttime_lights'] *= nlights_mult
 sim_scaled['omega_500'] *= omega_mult
 sim_scaled['cooling_capacity'] *= cooling_mult
