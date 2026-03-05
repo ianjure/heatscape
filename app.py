@@ -32,6 +32,12 @@ hide_menu = """
     [data-testid="stToolbar"] {
         display: none;
     }
+    [data-testid="stSidebarCollapseButton"] {
+        display: none;
+    }
+    [data-testid="stSidebar"] {
+        width: 320px;
+    }
     </style>
     """
 st.markdown(hide_menu, unsafe_allow_html=True)
@@ -333,3 +339,4 @@ with col2:
     # DISPLAY THE TABLE
     st.subheader("📍Barangays by UHI Intensity")
     st.dataframe(styled_table, height=400, use_container_width=True)
+
